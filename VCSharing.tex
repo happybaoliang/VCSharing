@@ -1,0 +1,129 @@
+﻿% !Mode:: "TeX:UTF-8"
+\documentclass[10pt,journal]{IEEEtran}
+\usepackage{subfig}
+\usepackage{graphicx}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\usepackage{comment}
+\usepackage{multirow}
+\usepackage{diagbox}
+\usepackage{ctex}
+
+\graphicspath{figures/}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+
+\hyphenation{on-chip real-time}
+
+\begin{document}
+\title{端口间缓存共享技术研究}
+%\onecolumn
+%\author{\IEEEauthorblockN{Baoliang Li}}
+
+\author{Baoliang~Li, %~\IEEEmembership{Student Member,~IEEE,}
+        Zeljko Zilic, %~\IEEEmembership{Senior Member,~IEEE,}
+        Wenhua~Dou, %~\IEEEmembership{Non-Member,~IEEE}% <-this % stops a space
+\thanks{Baoliang~Li and Wenhua Dou are with the College of Computer Science, National University of Defense Technology, Changsha 410073, P.R. China}%
+\thanks{Zeljko Zilic are with Department of Electrical \& Computer Engineering, McGill University, Montreal H3A-2A7, Quebec, Canada}%
+\thanks{Manuscript received XX XX, 2014; revised XX XX, 2014.}}
+
+\markboth{Journal of XXX,~Vol.~XX, No.~XX, XX~2014}%
+{Li \MakeLowercase{\textit{et al.}}: 端口间缓存共享技术研究}
+
+\maketitle
+
+\begin{abstract}
+本文提出了种基于端口间缓存共享的方法。
+\end{abstract}
+\begin{IEEEkeywords}
+Networks-on-Chip (NoC), buffer sharing
+\end{IEEEkeywords}
+
+\section{Introduction}
+\subsection{流量控制模块}
+我们的流量控制模块有两根线，每根线负责其中模块中一个buffer段的信约，信约控制器自动进行信约维护。
+
+我们的方法最重的一个特点是不增加VA和SA段的复杂性，因为这两段都处在路由器的关键路径上。
+
+TAMS的硕士论文中指出，ViChaR的方式提高了一个端口内部的buffer利用率，但是也提高了设计的复杂性和功耗。
+
+DAMQ的思路与ViChaR的区别在于DAMQ采用固定数量的VC，因而会出现HoL。
+
+我们提出的是一种运行的VC自适应技术，之前基于RTC的研究属于面向应用的buffer sizing方法，属于设计时的方法。
+
+ViChaR和RAVC的方法都需要对整个路由器进行重新设计，因而成本高。而我们的新方法则主要是在原来的基础上增加了些硬件来提高buffer的利用率。在做实验的时候我们可以统计每个buffer的利用率。
+
+最终我们要与conventional router进行比较。而且重新设计和实现sink端以统计各种信息。
+
+inter-port buffer sharing是我们论文的主题。
+
+MH提出的RAVC方法虽然支持动态VC数量以避免HoL，但是控制罗男过于复杂，硬件成本过高，需要大量的额外的存储器和寄存器文件来存储控制信息。而我们的方法增加的硬件几乎都是简单的组合逻辑电路，因则硬件成本更低。由于我们采用可扩展的VC结构，因则降低了拥塞端口发生拥塞的可能，在一定程度上对避免HoL也有帮助。
+
+buffer借用在热点流量情况下可能很有用，效果会很明显。而热点流量恰是Cache一致性能及MC访问的重要应用场景。
+
+为了简化硬件设计，我们只允许每个VC被偷一次。
+
+当需要进行VC间缓存共享时，通常的情况是这个端口已经很堵，因则借助端口内的缓存共享来改进性能的性能提升已经非常有限，而端口间缓存共享则没有这个问题。因为应用通常会呈现出流量在同一个路由器的不同端口间的不均衡分布情况，因而采用端口间共享对改进吞吐率有好处。当然，通道间共享和MH的工作都可以有效的防止HoL。因而二者熟优熟劣需要再进行考虑。当然，对于HoL问题，我们的方案可以在选择待偷端口时适当的考虑可能发生的阻塞。对于非均匀流量，特别是热点流量情况下，端口间的流量分布是严格不均匀的。
+
+在进行仲裁时，应当给借用的buffer空间切片以较高的优先级，以方便其清空队列。借用冲突可以通过与victim端口的协商来实现，theif端口和victim端口之间可以通过req/ack来交互。
+
+buffer的读写冲突可以通过独立的两对读写指针来实现，高位读写指针地址以1开头，低位读写指针地址以0开头。
+
+本文的一个重要的目标是改进现在的NoC的buffer利用率，增强性能的同时避免不可接受的硬件开销以及影响关键路径。
+
+我们的设计中，每个VC由两个FIFO组成，prime\_readd\_ptr和prime\_write\_ptr在非共享状态下用最高位做片选，在共享状态下由share信号选择高位地址，其自己的最高位置零。
+
+我们的设计的目的在于同时不引入较大的硬件开销
+
+提出一种新的流量控制方法，两根线，每根线负责维护信约模块中一个FIFO段的可用buffer空间。
+
+模块划分：
+
+1.流量控制模块：信约生成、信约跟踪。
+
+2.借用buffer的管理模块：处理借用和非借用状态下的地址译码以及读写，仲裁，队列空满检测模块。
+
+3.借且buffer读写控制模块。
+
+4.借用buffer跟踪模块。
+
+5.buffer借用状态机：buffer选择，协商，确认和释放。
+
+\section{重要提醒}
+Router\_Checker在做综合的过程中要去掉。
+
+VCR是带虚通道的路由器，RTR是SA与VA结合的实现方法，WHR是没有虚通道的实现方式。
+
+代码中的buffer\_size是一个端口的buffer总量，每个VC的buffer数量还需要除以VC数量。
+
+rtr\_flit\_buffer.v输入端口的管理模块
+
+原子分配的时候这种优化策略可能没有效果。一般的VC路由器吞吐率比较高，原子VC分配只有当切片的信约返回时该VC才可用，而一般的VC则在尾切片离开VC时即可以再次进行分配。原子VC分配当VC很多时可以达到很高的性能。
+
+在进行路由器综合时，mesh型拓扑结构中某些边缘路由器的某些端口可以不生成。
+
+代码中的message\_class和resource\_class都是指什么意思？
+
+拓扑结构的连接性包括线、环和全互连。
+
+路由器的端口数量等于每个维度的邻居数乘以网络维度再加上每个路由器的节点数。
+
+代码中的flow\_control\_bypass是什么意思？
+
+link\_ctrl是指功耗控制相关的。flit\_ctrl呢？
+
+看一下flit\_buffer的寄存器文件的实现方案。
+
+随机拓扑的生成可以采用TGFF工具。
+
+\section*{Acknowledgement}
+The authors thank the reviewers for their suggestions and comments, and all the experiments are carried out at the Integrated Microsystem Lab (IML) of McGill University. This research is supported by High Technology Research and Development Program of China (Grant No. 2012AA012201, 2012AA011902).
+
+\bibliographystyle{unsrt}
+\bibliography{Docear}
+
+\end{document}
