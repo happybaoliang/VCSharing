@@ -44,6 +44,26 @@ Networks-on-Chip (NoC), buffer sharing
 \end{IEEEkeywords}
 
 \section{Introduction}
+Proper buffer sizing and organization are essential to achieving optimal network performance
+
+画2张图表示静态缓存分配存在的问题：（1）3x3 mesh的例子说明端口之间的利用率不平衡；(2)同一个端口内VC之间的利用率不平衡。以3x3的mesh网络为例，在热点流量情况下（中间节点为热点）来说，热点的N和S端口接受的流量是W和E的3倍。因而如果能让W和E端口使用更多的buffer，那么那么对于因减少流量控制造成的stall而引起的大的延迟是非常有好处的。最理想的办法是，令每个端口使用$B_p=B_{total}\times\frac{C_p}{\sum_{p=1}^NC_p}$的buffer.然后对于每个端口所能使用的$B_p$个slot进行动态的管理。此外，端口间的buffer共享还有利于改进公平性以及不同数据流的吞吐率。最后指出，只有将端口间和VC 间的缓存共享同时实现才能够提高和改进buffer的利用率，以实现用最少的buffer来实现最高的性能。因为input buffers account for a large fraction of the overall area and power budget of typical Network-on-Chip。
+
+再画一张图表示当前动态VC分配所面临的信约耗尽问题。并指出Lai等人提出的拥塞避免算法可以避免端口间的拥塞，但是端口内同一个VC的拥塞却无法解决。Standford大学的方法可以解决这一问题。
+
+当把这种共享缓存形式的路由器应用于CPU-GPU混合的系统中时，带来的问题会更大，主要原因在于：GPU流量很大会很快将VC耗尽，而CPU流量很小由于信约太少而导致过大的延迟。而CPU程序通常是延迟敏感的。
+
+另外，完全动态的VC分配还会增加VCA和SWA的压力，而这两个流水段通常又处于路由器的关键路径上。
+
+再画1张图表示当前动态方案可能面临的死锁问题以及相应的解决办法。
+
+对相关研究现状的描述：Lai和VichaR的方法只解决了端口内的VC动态分配问题,此外DAMQ的方法访存周期较长（3拍），VCR的方法也只适用于同一个端口内，而且所解决的是在故障情况下的性能平滑下降问题。对于端口间的动态缓存管理，有一类方法方法采用完全共享的centralized buffer，这类方法属于精粒度的共享；还有一类方法采用不完全共享（DAC11），但是该方法不支持VC。而MH的方法只有在某个端口发生故障的情况下其对应的buffer才能够被其它端口使用，而且这种方法是全动态的，因而硬件开销很大。采用链表的方式实现的完全VC共享会消耗大量的存储资源和芯片面积，standford大学的研究结果表明这类方式虽然提高了资源的利用率但是开销是十分具大的，以16个VC为例，大概会引起60\%的开销。另外一方面，完全静态的方式又会严重影响性能。
+
+对我们的方案的简单介绍：因而我们的方法是在二者之间进行折衷，采用部分动态的VC 共享方式，每个端口分配一定数量的容量较小的静态VC（大小为可实现100\%吞吐率的最小值），端口之间共享一定数量的动态VC。每个端口只有当新到达的报文与被阻塞的报文不属于同一条流而且占用动态VC的数量小于其配额时才会启用动态VC。
+
+我们方案对上述几个问题的解决方法：（1）当某个端口的流量较少时，静态分配的VC足够支持切片数据的无阻塞移动。而当某些端口的流量较多时，共享的buffer则可以用来缓存大量的切片。由于静态分配的VC相当于是为每个端口预留的配额，因而可以有效的避免共享缓存被某个端口耗尽时对低速端口的影响。（2）同时，为了减轻VCA段的压力，我们可以还采用VVC映射的方法来动态的调整对动态缓存的使用。因为VCA通常处于关键路径上，这样的做法可以不影响路由器的关键路径。另外，我们所有的新增的硬件都可以并行的独立的操作，而而不对路由器的关键路径产生不利的影响。
+
+当前几乎所有的路由器都是输入排队的，因为输出排队需要每个端口以P倍的加速比运行才能达到100\%的吞吐率，而输入排队的路由器通常只有不到80\%的吞吐率。另外，输出排队由于需要复杂的仲裁等机制，功耗通常是输入排队系统的1.5倍以上。
+
 \subsection{流量控制模块}
 我们的流量控制模块有两根线，每根线负责其中模块中一个buffer段的信约，信约控制器自动进行信约维护。
 
@@ -81,6 +101,8 @@ buffer的读写冲突可以通过独立的两对读写指针来实现，高位�
 
 提出一种新的流量控制方法，两根线，每根线负责维护信约模块中一个FIFO段的可用buffer空间。
 
+之前的buffer共享策略没有考虑到恶意流占用很多buffer的情况，因而会对系统的加速比产生很大的影响。在具体做实验的时候我们可以通过综合流量发送1000个报文所用的时间来进行分析和说明。而我们的方法由于限制每个VC所用的buffer空间最大是3/2，因而会在一定程度上减轻这一影响。
+
 模块划分：
 
 1.流量控制模块：信约生成、信约跟踪。
@@ -93,7 +115,10 @@ buffer的读写冲突可以通过独立的两对读写指针来实现，高位�
 
 5.buffer借用状态机：buffer选择，协商，确认和释放。
 
-\section{重要提醒}
+\section{实验与评估}
+缓存资源的使用比较：（1）列表比较资源；（2）实验比较性能，包括吞吐率和延迟；（3）综合结果比较面积和功耗。
+
+\section{代码阅读重要提醒}
 Router\_Checker在做综合的过程中要去掉。
 
 VCR是带虚通道的路由器，RTR是SA与VA结合的实现方法，WHR是没有虚通道的实现方式。
@@ -119,6 +144,12 @@ link\_ctrl是指功耗控制相关的。flit\_ctrl呢？
 看一下flit\_buffer的寄存器文件的实现方案。
 
 随机拓扑的生成可以采用TGFF工具。
+
+注意在VC和SW仲裁时VC非空和满时的选项
+
+VC分配是否偏向空队列的选项
+
+almost full的含义是只剩下1个buffer空间
 
 \section*{Acknowledgement}
 The authors thank the reviewers for their suggestions and comments, and all the experiments are carried out at the Integrated Microsystem Lab (IML) of McGill University. This research is supported by High Technology Research and Development Program of China (Grant No. 2012AA012201, 2012AA011902).
