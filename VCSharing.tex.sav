@@ -94,7 +94,7 @@ VCA也需要修改。假设每个端口有m个静态VC，那么VCA的实现规�
 
 A High-Throughput Distributed Shared-Buffer NoC Router应该值得参考。其提高吞吐率的方法与我们的方法很像。类似的文章还有Achieving High-Performance On-Chip Networks with Shared Buffer Routers。但是，这两篇论文中给出的方法都不支持VC，是典型的虫孔路由器。
 
-VC保证在同一个通道中的报文切片顺序不会交错。
+
 
 有关队列空满的信号由free buffer tracker模块产生。
 
