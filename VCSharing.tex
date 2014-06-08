@@ -5,7 +5,7 @@
 
 
 \begin{document}
-\title{端口间缓存共享技术研究}
+\title{端口间缓存和vc共享技术研究}
 %\onecolumn
 %\author{\IEEEauthorblockN{Baoliang Li}}
 
@@ -17,7 +17,7 @@
 \thanks{Manuscript received XX XX, 2014; revised XX XX, 2014.}}
 
 \markboth{Journal of XXX,~Vol.~XX, No.~XX, XX~2014}%
-{Li \MakeLowercase{\textit{et al.}}: 端口间缓存共享技术研究}
+{Li \MakeLowercase{\textit{et al.}}: 端口间缓存和vc共享技术研究}
 
 \maketitle
 
@@ -184,7 +184,11 @@ rtr\_flit\_buffer会根据存储的分配模式确定是采用damq或者FIFO队�
 
 rtr\_flow\_ctrl\_output模块中，flow\_ctrl\_width等于vc寻址宽度+1（对应于credit\_valid信号）.这个模块输入信号有流量控制有效信号flow\_ctrl\_valid和该事件对应的vc，这两人个信号一个对应于sw分配的授权信号和vc选择信号。输出信号flow\_ctrl\_out连接到上级路由器的rtr\_flow\_ctrl\_input模块中。flow\_ctrl\_out的第0位即credit\_valid由锁存器驱动。信约所对应的vc由select信号译码后得到，该信号也是由锁存器驱动。
 
-vcr\_ivc\_ctrl模块中实例化的子模块包括rtr\_route\_filter,rtr\_routing\_logic和rtr\_next\_hop\_addr.这个模块的实现非常复杂，它的会根据当前的路由器的地址来计算输出端口。这个模拟接受来自rtr\_channel\_input模块译码产生的flit\_valid\_in等信号，另外，这些经过译码的信号还会连接到rtr\_flit\_buffer模块.这个模块用于计算前瞻路由信息并更新头切片的lar域，经过这个模块以后的切片会直接穿过switch并进入rtr\_channel\_output模块。在综合的过程中，这个模块中rtr\_flit\_type\_check模块需要注释掉。这个模块的主要功能包括：（1）跟踪每个ivc的ovc分配情况;(2)为该ivc生成header, tail 的indicator信号.（3）更新该vc的头信息寄存器；（4）解码头切片中的路由信息；（5）计算下一跳的路由信息；（6）跟踪每个信约的使用情况. 
+vcr\_ivc\_ctrl模块中实例化的子模块包括rtr\_route\_filter,rtr\_routing\_logic和rtr\_next\_hop\_addr.这个模块的实现非常复杂，它的会根据当前的路由器的地址来计算输出端口。这个模拟接受来自rtr\_channel\_input模块译码产生的flit\_valid\_in等信号，另外，这些经过译码的信号还会连接到rtr\_flit\_buffer模块.这个模块用于计算前瞻路由信息并更新头切片的lar域，经过这个模块以后的切片会直接穿过switch并进入rtr\_channel\_output模块。在综合的过程中，这个模块中rtr\_flit\_type\_check模块需要注释掉。这个模块的主要功能包括：（1）跟踪每个ivc的ovc分配情况;(2)为该ivc生成header, tail 的indicator信号.（3）更新该vc的头信息寄存器；（4）解码头切片中的路由信息；（5）计算下一跳的路由信息；（6）跟踪每个信约的使用情况. 对相关信号的说明：flit\_sel\_in信号由rtr\_channel\_input模块译码得到，该信号结合flit\_valid\_in信号可以说明当前到达的切片可以属于该ivc。该模块同时还输出flit\_valid信号，当对应的vc不为空或者该vc有新到达的切片时这个信号有效。表示对应ivc己经被分配的allocated信号在这个模块中被锁存。flit\_tail和flit\_head信号的产生方法是：如果当前队列为空那么就看新到达该vc的切片是否是尾／头切片，否则就根据flit\_buffer的flit\_tail和flit\_head信号。在这个模块中flit\_sent信号非常重要，因为他是决定各个信号取值的关键。这个信号产生的方法是根据vc和sw分配的结果来进行的。当新到达的切片是头切片时，header\_info\_in信号有效，其它包括了该切片的路由等信息，该信号在rtr\_ip\_ctrl\_mac模块中从头切片的前面若干字段中取出得到。该模块中的信约跟踪实现的是对ivc空满状态的跟踪，
+
+rtr\_next\_hop\_addr模块接受的输入包括当前的路由器地址，lar信息和目的地址信息。输出的是下一跳的路由器地址。这个下一跳地址会作为rtr\_routing\_logic模块的输入用于计算当前切片在下一跳路由器处的输出端口。该输出端口信息在经过译码之后写入切片的lar\_header中。
+
+代码中所有以*\_active结尾的信号实际上都相当于是模块使能信号。
 
 vcr\_op\_ctrl\_mac模块中实例化的子模块包括rtr\_flow\_ctrl\_input，rtr\_fc\_state, rtr\_channel\_output, 并为每一个输出vc实例化一个rtr\_ovc\_ctrl。rtr\_flow\_ctrl\_input接受下游路由器的信约反馈信息并对其进行译码和缓存，该模块的两人个输出信号是valid和sel。这两个信号会被输入到rtr\_fc\_state模块，而rtr\_fc\_state模块的作用是跟踪每个ovc的信约使用情况。
 
@@ -225,6 +229,19 @@ flit\_buffer的寄存器文件的实现方案与mh和lai的方法相同，都是
 VC分配是否偏向空队列的选项
 
 almost full的含义是只剩下1个buffer空间
+
+代码中资源和消息类的含义：为了防止协议死锁，通常需要将网络中的报文分为若干个消息类，并将网络中的vc分几一些子集，然后将不同消息类的报文分配不同的vc子集中。另外，在一个消息类的报文中，为了防止因为资源循环依赖造成的死锁。还可以将每个消息类中的报文分为几个资源类别，不同资源类别的报文在竞争共享资源时形成一个偏序，因而可以避免这种死锁。注意到不同的消息类之间不存储资源死锁，因为他们是被映射到不同的硬件资源上的。在代码中假设每个类别使用的vc数量相同，这样整个路由器中每个端口需要的vc数量便等于资源类型的数量乘以消息类型的数量再乘以每个类型所能使用的vc数量。在具体的实现过程中，我们还要以考虑简化情况即消息类型和资源类型均为1，在这种情况下每个类型的vc数量便等于端口所能使用的最大的vc数量。
+
+\section{代码修改过程}
+（1）源端与路由器的接口处：在testbench.v模块中实例化了router\_wrap,flit\_sink.v和packet\_source.v三个模块。为此，我们需要在packet\_source和router\_wrap之间的接口处增加一些信号线以表示这些动态的vc变化信息。具体的方法是：（1）增加M根线从router\_wrap到packet\_source（memory\_bank\_allocated）来表示每个memory bank的可用性；只有当相应的memory bank可用时packet\_source模块可以利用相应的vc。router\_wrap模块按照一定的策略选择该memory bank的下一个使用者并修改memory\_bank\_grant信号，packet\_source发现该信号无效以后便不再分配该vc。当这个memory bank上的所有vc被释放时router\_wrap回收该memory bank并将其分配给其它端口使用。（2）增加一根从router\_wrap到packet\_source的信约反馈信号线credit\_for\_shared用于表示当前反馈的信约是共享vc的还是私有vc的。(3)在packet\_source中增加5个流量控制模块用于跟踪5个共享的存储器的使用情况，这5个共享的存储体上的vc指针只能够寻址1个memory bank。（4）增加一根从packet\_source到router\_wrap的信号线用于表明当前的vc id是针对私有vc的还是共享vc的。由于在源端对输出vc的选择是随机进行的，没有相应的分配模块，因此源端的修改还是非常简单的。另外，由于每个源端只有一条数据流，而且这种数据流是按顺序注入网络的，因此，我们的方案假设在源端不会占用共享的vc。对共享vc的占用仅在路由器内部。由于不会占用共享的vc，因此我们的方案在源端也不需要使用5个额外的流量控制模块。
+
+channel\_width＝链路控制信号的宽度＋切片数据信号的宽度＋切片控制信号的宽度。为了实现我们的设计方案，我们需要增加两人个额外的控制信号memory\_bank\_grant和credit\_for\_shared。
+
+（2）路由器与目的端之间：由于目的端有足够的消耗能力，因此在目的端不存在vc不足的情况。因此，我们的方案在目的端也不会占用共享的vc。对于共享vc的占用仅发生在路由器内部。因此，在目的端也不需要使用5个额外的流量控制模块。
+
+（3）路由器与路由器之间：先要在testbench中增加相应的连接线，然后在router\_wrap内部将这些信号连接到vcr\_top中，然后在vcr\_top中实现这些功能。
+
+通过这种方式，我们的方案所使用的控制存储资源要比mh小，同时我们的方案所用的控制存储资源实际上也比lai的方案要少。在做实验进行比较的过程中我们可以考虑两种情况：（1）同样的flit buffer大小的情况下比较性能； （2）同样的存储控制开销的情况下比较性能。（3）同样的性能情况下两人种方案需要的存储器和控制存储资源的多少。
 
 \section*{Acknowledgement}
 The authors thank the reviewers for their suggestions and comments, and all the experiments are carried out at the Integrated Microsystem Lab (IML) of McGill University. This research is supported by High Technology Research and Development Program of China (Grant No. 2012AA012201, 2012AA011902).
