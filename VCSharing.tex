@@ -5,7 +5,7 @@
 
 
 \begin{document}
-\title{端口间缓存和vc共享技术研究}
+\title{改进跌幅器性能通过端口间缓存和端口间缓存和vc共享技术}
 %\onecolumn
 %\author{\IEEEauthorblockN{Baoliang Li}}
 
@@ -129,7 +129,7 @@ inter-port buffer sharing是我们论文的主题。
 
 在做实验时可以考虑不同的报文长度以模拟cache一致性协议的需求，例如将报文长度取双峰分布，一个长度为1(对应读请求或者写响应消息)一个长度为16（对应cache行）。
 
-MH提出的RAVC方法虽然支持动态VC数量以避免HoL，但是控制罗男过于复杂，硬件成本过高，需要大量的额外的存储器和寄存器文件来存储控制信息。而我们的方法增加的硬件几乎都是简单的组合逻辑电路，因则硬件成本更低。由于我们采用可扩展的VC结构，因则降低了拥塞端口发生拥塞的可能，在一定程度上对避免HoL也有帮助。
+MH提出的RAVC方法虽然支持动态VC容量以避免HoL，但是控制罗男过于复杂，硬件成本过高，需要大量的额外的存储器和寄存器文件来存储控制信息。另外，几乎所有的以前的方案都是采用固定数量的vc和可变容量的vc来实现的。而我们的方法增加的硬件几乎都是简单的组合逻辑电路，因则硬件成本更低。由于我们采用可扩展的VC结构，因则降低了拥塞端口发生拥塞的可能，在一定程度上对避免HoL也有帮助。后来mh提出的ＲＡＶＡ的方法基于Ｖichar的方法，只能用于固定报文长度。
 
 buffer借用在热点流量情况下可能很有用，效果会很明显。而热点流量恰是Cache一致性能及MC访问的重要应用场景。
 
@@ -176,7 +176,7 @@ buffer的读写冲突可以通过独立的两对读写指针来实现，高位�
 \section{代码阅读重要提醒}
 router\_wrap是路由器的顶层模块，根据不同的配置参数，该模块可以实例化不同的路由器实现类型，例如虫孔路由器和虚通道路由器以及混合路由器。由于我们的研究是基于虚通道路由器的，因此router\_wrap会被实例化为vcr\_top模块。在vcr\_top模块中，为每一个输入端口实例化化一个vcr\_ip\_ctrl\_mac子模块，并为每一个输出端口实例化一个vcr\_op\_ctrl\_mac子模块，整个跌幅器还会实例化一个vcr\_alloc\_mac模块用于进行vc和sw的分配。另外，整个路由器还会实例化一个crossbar模块。
 
-在vcr\_ip\_ctrl\_mac模块中包括的子模块有rtr\_channel\_input和一个rtr\_flit\_buffer模块以及一个rtr\_flow\_ctrl\_output模块，并为每个vc实例化一个vcr\_ivc\_ctrl子模块。
+在vcr\_ip\_ctrl\_mac模块中包括的子模块有rtr\_channel\_input和一个rtr\_flit\_buffer模块以及一个rtr\_flow\_ctrl\_output模块，并为每个vc实例化一个vcr\_ivc\_ctrl子模块。还会更新切片的头信息并生成头尾信号。
 
 vcr\_channel\_input模块的作用是：在路由器之间进行连接的时候将所有的控制信号和数据信号都汇总在一起用channel总线来表示这样可以简化路由器连接的实现，而这个子模块的作用则是在路由器内部将channel总线中的信号剥离出来以便进行相关的操作。这个子模块的输入信号只有channel总线而输出信号包括：flit\_valid\_out, flit\_head\_out, flit\_head\_out\_ivc, flit\_data\_out和flit\_sel\_out\_ivc。flit\_data\_out和flit\_valid\_out都是经过锁存的输出信号，采用锁存器的目的是实现切片的流水传输。另外，关于切片的vc id需要先对channel的相关位进行译码才能得到选择器能使用的位向量信号。
 
@@ -190,17 +190,17 @@ rtr\_next\_hop\_addr模块接受的输入包括当前的路由器地址，lar信
 
 代码中所有以*\_active结尾的信号实际上都相当于是模块使能信号。
 
-vcr\_op\_ctrl\_mac模块中实例化的子模块包括rtr\_flow\_ctrl\_input，rtr\_fc\_state, rtr\_channel\_output, 并为每一个输出vc实例化一个rtr\_ovc\_ctrl。rtr\_flow\_ctrl\_input接受下游路由器的信约反馈信息并对其进行译码和缓存，该模块的两人个输出信号是valid和sel。这两个信号会被输入到rtr\_fc\_state模块，而rtr\_fc\_state模块的作用是跟踪每个ovc的信约使用情况。
+vcr\_op\_ctrl\_mac模块中实例化的子模块包括rtr\_flow\_ctrl\_input，rtr\_fc\_state, rtr\_channel\_output, 并为每一个输出vc实例化一个rtr\_ovc\_ctrl。rtr\_flow\_ctrl\_input接受下游路由器的信约反馈信息并对其进行译码和缓存，该模块的两人个输出信号是valid和sel。这两个信号会被输入到rtr\_fc\_state模块，而rtr\_fc\_state模块的作用是跟踪每个ovc的信约使用情况。在rtr\_route\_filter中要根据port\_id做判断。
 
-rtr\_ovc\_ctrl模块用于跟踪下流路由器的vc使用情况。这个模块实际上只有两个输出信号：flit\_sel和elig。flit\_sel信号最终会连接到rtr\_fc\_state模块上用于跟踪对应vc的信约使用情况。到达该ovc的切片来自正确的端口和ivc时这个信号assert而且被锁存。这个模块根据输入的切片类型以及下流路由器的信约情况来确定对应的ovc是否可用以及对应的空满状态(elig)。这个模块还接受vc和sw分配的结果并依据这些信息进行决策。
+rtr\_ovc\_ctrl模块用于跟踪下流路由器的vc使用情况。这个模块实际上只有两个输出信号：flit\_sel和elig。当端口号和vc号都匹配时flit\_sel信号才会有效，该信号最终会连接到rtr\_fc\_state模块上用于跟踪对应vc的信约使用情况。到达该ovc的切片来自正确的端口和ivc时这个信号assert而且被锁存。这个模块根据输入的切片类型以及下流路由器的信约情况来确定对应的ovc是否可用以及对应的空满状态(elig)。这个模块还接受vc和sw分配的结果并依据这些信息进行决策。
 
-rtr\_channel\_output的作用是将各种信号汇总成为channel总线，并实现锁存功能。其作用与rtr\_channel\_input相反。
+rtr\_channel\_output的作用是将各种信号汇总成为channel总线，并实现锁存功能。其作用与rtr\_channel\_input相反。该模块唯的输出是channel\_out.
 
-vcr\_alloc\_mac模块的实现比较简单，其主要功能就是根据配置参数来生成合适的vc和sw分配器。具体的vc和sw分配器实现我们可以不去考虑而直接采用clib库中已经实现的。
+vcr\_alloc\_mac模块的实现比较简单，其主要功能就是根据配置参数来生成合适的vc和sw分配器。具体的vc和sw分配器实现我们可以不去考虑而直接采用clib库中已经实现的。该模块接受的输入信号有７个：route\_ip\_ivc\_op, route\_ip\_ivc\_orc, allocated\_ip\_ivc, flit\_valid\_ip\_ivc, flit\_head\_ip\_ivc, flit\_tail\_ip\_ivc和free\_nonspec\_ip\_ivc.
 
 Router\_Checker在做综合的过程中要去掉。
 
-VCR是带虚通道的路由器，RTR是SA与VA结合的实现方法，WHR是没有虚通道的实现方式。
+VCR是带虚通道的路由器，WHR是没有虚通道的实现方式。
 
 代码中的buffer\_size是一个端口的buffer总量，每个VC的buffer数量还需要除以VC数量。
 
@@ -209,8 +209,6 @@ rtr\_flit\_buffer.v输入端口的管理模块
 原子分配的时候这种优化策略可能没有效果。一般的VC路由器吞吐率比较高，原子VC分配只有当切片的信约返回时该VC才可用，而一般的VC则在尾切片离开VC时即可以再次进行分配。原子VC分配当VC很多时可以达到很高的性能。
 
 在进行路由器综合时，mesh型拓扑结构中某些边缘路由器的某些端口可以不生成。
-
-代码中的message\_class和resource\_class都是指什么意思？
 
 拓扑结构的连接性包括线、环和全互连。
 
@@ -230,7 +228,7 @@ VC分配是否偏向空队列的选项
 
 almost full的含义是只剩下1个buffer空间
 
-代码中资源和消息类的含义：为了防止协议死锁，通常需要将网络中的报文分为若干个消息类，并将网络中的vc分几一些子集，然后将不同消息类的报文分配不同的vc子集中。另外，在一个消息类的报文中，为了防止因为资源循环依赖造成的死锁。还可以将每个消息类中的报文分为几个资源类别，不同资源类别的报文在竞争共享资源时形成一个偏序，因而可以避免这种死锁。注意到不同的消息类之间不存储资源死锁，因为他们是被映射到不同的硬件资源上的。在代码中假设每个类别使用的vc数量相同，这样整个路由器中每个端口需要的vc数量便等于资源类型的数量乘以消息类型的数量再乘以每个类型所能使用的vc数量。在具体的实现过程中，我们还要以考虑简化情况即消息类型和资源类型均为1，在这种情况下每个类型的vc数量便等于端口所能使用的最大的vc数量。
+代码中资源和消息类的含义：为了防止协议死锁，通常需要将网络中的报文分为若干个消息类，并将网络中的vc分几一些子集，然后将不同消息类的报文分配不同的vc子集中。另外，在一个消息类的报文中，为了防止因为资源循环依赖造成的死锁。还可以将每个消息类中的报文分为几个资源类别，不同资源类别的报文在竞争共享资源时形成一个偏序，因而可以避免这种死锁。注意到不同的消息类之间不存储资源死锁，因为他们是被映射到不同的硬件资源上的。在代码中假设每个类别使用的vc数量相同，这样整个路由器中每个端口需要的vc数量便等于资源类型的数量乘以消息类型的数量再乘以每个资源类型所能使用的vc数量。在具体的实现过程中，我们还要以考虑简化情况即消息类型和资源类型均为1，在这种情况下每个资源类型的vc数量便等于端口所能使用的最大的vc数量。另外，在代码中还出现了报文类的概念，报文类的数量等于消息类的数量乘以资源类的数量。
 
 \section{代码修改过程}
 （1）源端与路由器的接口处：在testbench.v模块中实例化了router\_wrap,flit\_sink.v和packet\_source.v三个模块。为此，我们需要在packet\_source和router\_wrap之间的接口处增加一些信号线以表示这些动态的vc变化信息。具体的方法是：（1）增加M根线从router\_wrap到packet\_source（memory\_bank\_allocated）来表示每个memory bank的可用性；只有当相应的memory bank可用时packet\_source模块可以利用相应的vc。router\_wrap模块按照一定的策略选择该memory bank的下一个使用者并修改memory\_bank\_grant信号，packet\_source发现该信号无效以后便不再分配该vc。当这个memory bank上的所有vc被释放时router\_wrap回收该memory bank并将其分配给其它端口使用。（2）增加一根从router\_wrap到packet\_source的信约反馈信号线credit\_for\_shared用于表示当前反馈的信约是共享vc的还是私有vc的。(3)在packet\_source中增加5个流量控制模块用于跟踪5个共享的存储器的使用情况，这5个共享的存储体上的vc指针只能够寻址1个memory bank。（4）增加一根从packet\_source到router\_wrap的信号线用于表明当前的vc id是针对私有vc的还是共享vc的。由于在源端对输出vc的选择是随机进行的，没有相应的分配模块，因此源端的修改还是非常简单的。另外，由于每个源端只有一条数据流，而且这种数据流是按顺序注入网络的，因此，我们的方案假设在源端不会占用共享的vc。对共享vc的占用仅在路由器内部。由于不会占用共享的vc，因此我们的方案在源端也不需要使用5个额外的流量控制模块。
@@ -242,6 +240,29 @@ channel\_width＝链路控制信号的宽度＋切片数据信号的宽度＋切
 （3）路由器与路由器之间：先要在testbench中增加相应的连接线，然后在router\_wrap内部将这些信号连接到vcr\_top中，然后在vcr\_top中实现这些功能。
 
 通过这种方式，我们的方案所使用的控制存储资源要比mh小，同时我们的方案所用的控制存储资源实际上也比lai的方案要少。在做实验进行比较的过程中我们可以考虑两种情况：（1）同样的flit buffer大小的情况下比较性能； （2）同样的存储控制开销的情况下比较性能。（3）同样的性能情况下两人种方案需要的存储器和控制存储资源的多少。
+
+片上网络中的两个分配器实现很复杂，但是当报文很长时，空闲的时间会很多，因此通过对vc和sw分配器的复用可以获得极大的好处。定义一个指标来度量这一空闲度。$$\rho=\frac{\sum_{i=1}^N busycycles_i-\sum_{i=1}^Ninsufficientcycles}{N\times T_{totalcycles}}$$
+
+另外，我们采用较少的vc和sw分配器实现了较大规模vc的分配任务。虽然我们的方法没有提高vc和sw分配器的匹配度（目前也有相关的研究），但是我们对每个分配器端口进行了复用，提高了其利用率，避免了闲置。另外，由于每个端口可用的vc数量为$V_{min}$到$2V_{min}$之间，因而在一定程度上也缓解了因为vc分配失败所带来的开销。
+
+我们的方案中每个共享的bank输出５根线用于表示当前bank授权给评谁用。在路由器的每个输出端口上也有５根线用于表示这５个bank在该端口的可用性。采用一个有限状态机来控制对bank的分配，该状态机有３个状态。并设计一个公式来做为每个端口的请求度。对于５个bank和5个端口间的分配有２５种方案，最优的方案由５个分配控制有限状态机来实现。
+
+我们的方案在进行vc和sw仲裁时，同一个输入端口内赋给影子vc较高的优先级以帮助其尽快排空队列。而对输出端vc则优先分配给私有的vc。以缩短采用和整个vc的分配周期，尽可能快的适应当前网络的流量状况。
+
+对于缓存控制资源的比较：
+我们的方案：
+$5(2*5/6V_mlog5/6B+5/6Blog5/6B)+5/6BlogB/6+5/6BlogB/6$
+
+敕的方法：
+$5(2V_mlogB+BlogB)$
+
+ＭＨ的方案１：
+$5(2V_mlog5B+Blog5B)$
+
+ＭＨ的方案２：
+
+
+我们的方法对于均匀流量来说收益可能是负面的，原因解释与ICCAD'12上的论文相同。
 
 \section*{Acknowledgement}
 The authors thank the reviewers for their suggestions and comments, and all the experiments are carried out at the Integrated Microsystem Lab (IML) of McGill University. This research is supported by High Technology Research and Development Program of China (Grant No. 2012AA012201, 2012AA011902).
