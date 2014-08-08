@@ -1,0 +1,107 @@
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+Design : router_syn
+Version: B-2008.09
+Date   : Fri Aug  8 13:35:20 2014
+****************************************
+
+ # A fanout number of 1000 was used for high fanout net computations.
+
+Operating Conditions: typical   Library: gscl45nm
+Wire Load Model Mode: top
+
+  Startpoint: rtr/vcr/ips[2].ipc/chi/flit_dataq/q_reg[0]
+              (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: rtr/vcr/ips[2].ipc/fb/pop_dataq/q_reg[5]
+            (rising edge-triggered flip-flop clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock clk (rise edge)                                   0.00       0.00
+  clock network delay (ideal)                             0.00       0.00
+  rtr/vcr/ips[2].ipc/chi/flit_dataq/q_reg[0]/CLK (DFFSR)
+                                                          0.00 #     0.00 r
+  rtr/vcr/ips[2].ipc/chi/flit_dataq/q_reg[0]/Q (DFFSR)
+                                                          0.11       0.11 r
+  U88913/Y (INVX1)                                        0.42       0.53 f
+  U70303/Y (INVX1)                                        0.53       1.06 r
+  rtr/vcr/ips[2].ipc/ivcs[9].ivcc/U72/Y (AOI22X1)         0.14       1.20 f
+  U87355/Y (INVX1)                                        0.42       1.62 r
+  rtr/vcr/alo/vc_core_sep_if/mcs[0].ips[2].ircs[0].icvcs[9].elig_ovc_sel/U14/Y (AOI22X1)
+                                                          0.15       1.77 f
+  U40317/Y (BUFX2)                                        0.07       1.84 f
+  U40313/Y (AND2X2)                                       0.04       1.88 f
+  U40314/Y (INVX1)                                        0.03       1.91 r
+  U20785/Y (AND2X1)                                       0.05       1.96 r
+  U20786/Y (INVX1)                                        0.03       1.99 f
+  rtr/vcr/alo/vc_core_sep_if/mcs[0].ips[2].ircs[0].icvcs[9].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U40/Y (NAND3X1)
+                                                          0.03       2.03 r
+  U14684/Y (OR2X2)                                        0.05       2.07 r
+  U14685/Y (INVX1)                                        0.02       2.09 f
+  rtr/vcr/alo/vc_core_sep_if/mcs[0].ips[2].ircs[0].icvcs[9].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U38/Y (NAND3X1)
+                                                          0.03       2.12 r
+  U78452/Y (BUFX2)                                        0.08       2.20 r
+  U68429/Y (INVX1)                                        0.10       2.30 f
+  rtr/vcr/alo/vc_core_sep_if/mcs[0].ips[2].ircs[0].icvcs[9].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U26/Y (AOI22X1)
+                                                          0.06       2.36 r
+  U24922/Y (BUFX2)                                        0.04       2.40 r
+  U24921/Y (INVX1)                                        0.02       2.43 f
+  U57868/Y (AND2X1)                                       0.07       2.50 f
+  rtr/vcr/alo/vc_core_sep_if/mcs[0].ops[3].orcs[0].ocvcs[9].req_out_ip_rb/ps[2].bop/U3/Y (NOR3X1)
+                                                          0.05       2.54 r
+  U53659/Y (AND2X1)                                       0.04       2.59 r
+  rtr/vcr/alo/vc_core_sep_if/mcs[0].ops[3].orcs[0].ocvcs[9].req_out_ip_rb/ps[2].bop/U2/Y (NAND3X1)
+                                                          0.01       2.60 f
+  U43328/Y (BUFX2)                                        0.04       2.64 f
+  U1055/Y (AND2X1)                                        0.04       2.68 f
+  U100512/Y (NOR2X1)                                      0.03       2.71 r
+  U24979/Y (AND2X2)                                       0.05       2.76 r
+  U24980/Y (INVX1)                                        0.03       2.79 f
+  U37326/Y (NOR2X1)                                       0.03       2.83 r
+  U37324/Y (NOR2X1)                                       0.02       2.84 f
+  U37323/Y (BUFX2)                                        0.04       2.89 f
+  U53632/Y (INVX1)                                        0.22       3.11 r
+  U51403/Y (NAND2X1)                                      0.08       3.19 f
+  U5391/Y (AND2X2)                                        0.04       3.23 f
+  U38033/Y (INVX1)                                        0.02       3.25 r
+  rtr/vcr/alo/vc_core_sep_if/U8299/Y (NOR3X1)             0.03       3.29 f
+  U49832/Y (AND2X1)                                       0.05       3.33 f
+  rtr/vcr/alo/vc_core_sep_if/U8298/Y (NAND3X1)            0.03       3.36 r
+  U46007/Y (BUFX2)                                        0.04       3.40 r
+  U37822/Y (OR2X1)                                        0.07       3.46 r
+  rtr/vcr/ips[2].ipc/spec_mask_sel/U6/Y (AOI22X1)         0.03       3.50 f
+  rtr/vcr/ips[2].ipc/spec_mask_sel/U2/Y (AND2X2)          0.05       3.55 f
+  rtr/vcr/ips[2].ipc/spec_mask_sel/U4/Y (NAND3X1)         0.03       3.58 r
+  rtr/vcr/ips[2].ipc/spec_mask_sel/U1/Y (OR2X2)           0.05       3.63 r
+  U65765/Y (AND2X1)                                       0.26       3.89 r
+  U52873/Y (AND2X1)                                       0.43       4.32 r
+  U51494/Y (INVX1)                                        0.17       4.49 f
+  U49886/Y (INVX1)                                        0.22       4.71 r
+  rtr/vcr/ips[2].ipc/fb/U212/Y (AOI22X1)                  0.08       4.78 f
+  U11882/Y (AND2X2)                                       0.06       4.84 f
+  U11883/Y (INVX1)                                        0.02       4.86 r
+  rtr/vcr/ips[2].ipc/fb/pop_dataq/U119/Y (AOI22X1)        0.01       4.87 f
+  U88409/Y (INVX1)                                        0.05       4.93 r
+  rtr/vcr/ips[2].ipc/fb/pop_dataq/q_reg[5]/D (DFFSR)      0.00       4.93 r
+  data arrival time                                                  4.93
+
+  clock clk (rise edge)                                   5.00       5.00
+  clock network delay (ideal)                             0.00       5.00
+  rtr/vcr/ips[2].ipc/fb/pop_dataq/q_reg[5]/CLK (DFFSR)
+                                                          0.00       5.00 r
+  library setup time                                     -0.07       4.93
+  data required time                                                 4.93
+  --------------------------------------------------------------------------
+  data required time                                                 4.93
+  data arrival time                                                 -4.93
+  --------------------------------------------------------------------------
+  slack (MET)                                                        0.00
+
+
+1
