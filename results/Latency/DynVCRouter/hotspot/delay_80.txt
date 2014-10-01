@@ -1,0 +1,35 @@
+max packet latency: 3071
+min packet latency: 19
+total average packet latency is: 106.521
+average packet latency arrived at 0:
+   -nan	431.756	132.478	93.2963	37.9455	64.3249	 89.139	 97.169	 42.394	69.5525	   99.6	101.227	46.1728	72.5729	97.7544	103.788	
+average packet latency arrived at 1:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 2:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 3:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 4:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 5:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 6:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 7:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 8:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 9:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 10:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 11:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 12:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 13:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 14:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	
+average packet latency arrived at 15:
+   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan	   -nan

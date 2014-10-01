@@ -5,10 +5,11 @@ Warning: Design has unannotated sequential cell outputs. (PWR-415)
  
 ****************************************
 Report : power
+        -hier
         -analysis_effort low
 Design : router_syn
 Version: B-2008.09
-Date   : Sun Aug  3 09:53:13 2014
+Date   : Fri Sep  5 12:04:29 2014
 ****************************************
 
 
@@ -30,11 +31,9 @@ Power-specific unit information :
     Leakage Power Units = 1nW
 
 
-  Cell Internal Power  = 100.5011 mW   (99%)
-  Net Switching Power  =   1.3982 mW    (1%)
-                         ---------
-Total Dynamic Power    = 101.8994 mW  (100%)
-
-Cell Leakage Power     =   3.6868 mW
-
+--------------------------------------------------------------------------------
+                                       Switch   Int      Leak     Total
+Hierarchy                              Power    Power    Power    Power    %
+--------------------------------------------------------------------------------
+router_syn                                1.468  100.663 3.72e+06  105.852 100.0
 1

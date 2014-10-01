@@ -1,0 +1,36 @@
+max packet latency: 249
+min packet latency: 34
+total average packet latency is: 58.1823
+average packet latency arrived at 0:
+    nan 58.5047 56.7237  58.353  40.515 54.7458 57.1567  62.752 44.6551 58.8955 61.4007 66.6571 48.3711 63.7915 67.7261 70.5959
+average packet latency arrived at 1:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 2:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 3:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 4:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 5:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 6:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 7:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 8:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 9:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 10:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 11:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 12:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 13:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 14:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+average packet latency arrived at 15:
+    nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan     nan
+[root@localhost conventional_router]#

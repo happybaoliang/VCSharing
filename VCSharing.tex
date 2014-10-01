@@ -1,11 +1,24 @@
-﻿\documentclass[10pt,journal]{IEEEtran}
-\usepackage{ctex}
-\usepackage{multirow}
+% !Mode:: "TeX:UTF-8"
+%\documentclass[10pt,draft]{IEEEtran}
+\documentclass[10pt,conference]{IEEEtran}
+\usepackage{subfig}
+\usepackage{graphicx}
 \usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{algorithm}
+\usepackage{algorithmic}
 \usepackage{comment}
+%\usepackage{ctex}
+
+\graphicspath{figures/}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
 
 \begin{document}
-\title{AVCS-NOC: A Novel Adaptive Virtual Channel Sharing Networks-on-Chip}
+
+\title{AVCS-NoC: A Novel Adaptive Virtual Channel Sharing Networks-on-Chip Architecture}
 %\onecolumn
 %\author{\IEEEauthorblockN{Baoliang Li}}
 \author{Baoliang~Li, %~\IEEEmembership{Student Member,~IEEE,}
@@ -16,187 +29,423 @@
 \thanks{Manuscript received XX XX, 2014; revised XX XX, 2014.}}
 
 \markboth{Journal of XXX,~Vol.~XX, No.~XX, XX~2014}%
-{Li \MakeLowercase{\textit{et al.}}: 端口间缓存和vc共享技术研究}
+{Li \MakeLowercase{\textit{et al.}}: Adaptive Virtual Channel Sharing Networks-on-Chip Architecture}
 
 \maketitle
 
 \begin{abstract}
-基于虚通道的片上网络的性能和效率都严重的依赖于对片上缓存的组织和管理方式。为了最大化片上网络的性能并降低功耗，片上的缓存资源的分配和管理需要适应片上网络流量负载的动态变化。为此，本文提出了一种端口间缓存和虚通道共享的片上网络体系结构。该结构可以在运行时根据网络流量的变化动态的调整每个端口所能使用的缓存和虚通道资源，以提高性能和缓存利用率，达到以较少的硬件资源来实现较高的性能的目的。我们还提出了影子vc的概念，通过复用虚通道分配器和交换机仲裁器的端口来提高其端口利用率，在不影响性能的情况下实现以小规模分配器完成大量虚通道资源的分配的目的。基于一个详细的ＲＴＬ硬件实现，我们采用design compiler基于45nm CMOS standard cell library评估了该方案的硬件成本、功耗和性能。experimental results show that our architecture improve the performance of router by xx\% under bitcom, bitrev, etc. traffic pattern. 
-
+The performance and hardware overhead of wormhole switched Networks-on-Chip (NoC) heavily depend on the organization and management scheme of input buffer. In order to achieve high performance without introducing significant power and area burden, the allocation of buffer resource should adapt the dynamical changing of traffic load. In this paper, we propose an inter-port Adaptive Virtual Channel Sharing NoC architecture, i.e. AVCS-NoC, which adjusts the VC number and buffer capacity each input port can use to improve the buffer utilization and network performance. Another contribution of this paper is that we introduce the idea of port sharing while implementing the VC Allocator (VCA) and SWitch Allocator (SWA), which utilizes a smaller VCA and SWA to meet the demand of large scale VC arbitration. Based on a detailed RTL implementation, we evaluate the performance and hardware overhead of our proposal. Experimental results show that the proposed micro-architecture provides x\% and y\% average latency reduction under hotpsot and transpose traffic pattern near the saturation point while saving z\% area when compared to the linked-list based dynamical VC structure. For a real-work Video Object Plan Decoder (VOPD) application, our proposal improves the average latency by y\%. Our proposal saves x\% power and y\% chip area when compared with the typical router architecture with similar performance.
+\begin{comment}
+基于虚通道的虫孔交换片上网络的性能和成本严重的依赖于对片上缓存的组织和管理方式。为了最大化片上网络的性能并降低功耗和面积开销，片上缓存资源的分配和管理需要适应片上网络流量负载的动态变化并提高缓存的利用率。为此，本文提出了一种端口间缓存和虚通道共享的片上网络体系结构，该结构可以在运行时根据网络流量的变化动态的调整每个端口所能使用的缓存容量和虚通道数量，以提高网络性能和缓存利用率，达到以较少的硬件资源来实现较高的性能的目的。另外，为了降低虚通道和交换机分配器的规模，我们还提出了影子vc的概念，通过复用虚通道分配器和交换机仲裁器的端口来提高其端口利用率，在不影响性能的情况下实现以小规模分配器完成大量虚通道资源的分配的目的。基于一个详细的RTL硬件实现，我们评价了该方案的性能,并采用design compiler 基于45nm CMOS standard cell library 评估了该方案的硬件成本和功耗等指标。实验结果显示，与之前基于链表的动态缓存分配方案相比，我们的方案在热点流量下改进性能x\%，占用的芯片面积减少x\%。对于一个具体的VOPD应用，我们的方案较基于链表的方案性能提高\%x.与典型的虫孔交换的虚通道路由器相比，达到同样的的性能，我们的方案所需要的缓存资源减少x\%, 功耗降低x\%,面积减少x\%。
+\end{comment}
 \end{abstract}
 \begin{IEEEkeywords}
-Networks-on-Chip (NoC), buffer sharing，ＶＣ　sharing
+Networks-on-Chip (NoC), VC sharing, buffer utilization
 \end{IEEEkeywords}
 
 \section{Introduction}
-随着芯片集成度的提高，单个芯片上所能使用的晶体管数量大幅提高，同时过去通过提高主频来单核性能的方法受到散热和功耗的影响已经无法奏效。通过片上集成大量的处理器核的方法来提高性能是处理器设计的唯一出路。在多核和众核处理器系统中，核之间的通信由互连网络来实现。对于大规模系统片上网络提供了一种可扩展高性能低成本的实现方式。
+The wormhole switched Networks-on-Chip (NoC) provides a scalable, high performance and low cost interconnection fabric for the large scale Chip-MultiProcessor (CMP) and System-on-Chip (SoC). The performance, power and area of NoC router heavily depend on the buffer capacity and organization scheme. In a typical router, all the input ports have the same number of VCs and each VC is designated a fixed buffer capacity \cite{DaTo01}. Although this static structure eases the implementation, the buffer utilization under some uneven traffic pattern is very poor. Because the traffic load is nonuniform and time variant. For the input port with lower traffic load, few VCs and buffer space are enough to temporarily hold the incoming packets that cannot be forwarded immediately, while more VCs and buffer space are necessary for the input ports with high traffic load to guarantee the throughput. Since the on-chip buffer consumes more than 60\% power and chip area of a router \cite{1650108}\cite{ChPe03}, reserving large enough buffer space for each input port to ensure the performance under high traffic load is unfeasible.
+\begin{comment}
+基于虚通道的虫孔交换片上网络为大规模片上多处理器系统和片上系统中核间通信提供了一种可扩展、高性能和低成本的实现方式。其性能、功耗和硬件成本都受到虚通道的数量、输入端口的缓存容量和缓存的组织方式的影响。传统的虚通道虫孔交换的片上网络路由器为每个端口分配相同数量的虚通道并为每个虚通道分配同样大小的缓存空间\cite{DaTo01}。这种静态分配的路由器结构虽然实现简单，但是在某些特定的流量模式下，其缓存资源得不到有效的利用。因为实际的traffic负载在片上网络中的分布通常是不均匀的而且是随时间动态变化的，traffic load较低的端口只需要较少的虚通道和缓存空间便可以保证吞吐率，而处于high traffic load的端口则需要较多的缓存空间和虚通道。类似的，同一端口内不同虚通道对缓存容量的需要也是不同的。为每个端口和每个虚通道分配较大的缓存容量虽然可以保证在高负载情况下的性能，但是会引入无法承受的芯片面积和消耗开销。因为有研究结果表明，片上网络６０\%的功耗都是由缓存消耗的\cite{1650108}\cite{ChPe03}。
+\end{comment}
 
-缓存容量和组织方式是片上网络设计的重要方面，因为它会直接影响到整个片上网络的性能、功耗和成本。传统的虚通道虫孔交换的片上网络路由器为每个端口分配相同数量的虚通道并为每个虚通道分配同样大小的缓存空间\cite{DaTo01}。这种静态分配的路由器结构虽然实现简单，但是在某些特定的流量模式下，其缓存资源得不到有效的利用。因为实际的traffic负载在片上网络中的分布通常是不均匀的而且是随时间动态变化的，处于low traffic load的端口/区域只需要较少的虚通道和缓存空间，而处于high traffic load的端口则需要较多的缓存空间和虚通道才能减少流量控制阻塞和ＨoL。尽管为每个端口分配较大的缓存容量可以在高负载情况下减少流量控制造成的性能开销，但是会占用更多的芯片面积和消耗更多的能量。研究结果表明，片上网络所占用的芯片面积和功耗比例越来越大\cite{1650108}。而且片上网络６０\%的片上网络功耗是由缓存消耗的\cite{ChPe03}。
+The only way to implement high performance and low cost NoC is by improving the buffer utilization through appropriate buffer organization and management scheme. There have been significant works on this issue, e.g. \cite{NPKV06,4555894,5770788,6310960}
+\cite{Neishaburi:2009:RAN:1531542.1531658}. To save buffer, these approaches dynamically allocate the buffer slots within an input port to each VCs according to the traffic conditions, which achieve 50\% buffer saving without degenerating the network performance \cite{NPKV06}. To further improve the performance and buffer utilization of router, inter-port buffer sharing was proposed in \cite{Neishaburi:2009:RAN:1531542.1531658}\cite{5770788}. Although all these approach employ the dynamical buffer management, the number of VCs each input port can use is still fixed. We find that, under some circumstances, these approaches can not fully exploit the performance with limited buffer resource. We take a $3\times 3$ mesh network employing Dimension Order Routing (DOR) as an example to illustrate one of these scenarios, as shown in Fig. \ref{vcensuficent}. Packets from router 9 and 3 to router 5 are blocked due to lack of available VCs at the input port N and S. Whereas, 4 VCs in total at input port W, E and L are idle. This example reveals that only sharing buffer among VCs and port is not enough to maximize the performance of wormhole router, because the limited VC resource restricts the usage of buffer. Since the number of VC an input port need at any time instance is equal to the number of partial packets it holds, it changes dynamically with time and traffic pattern.
+\begin{comment}
+因此，并采用有效的缓存组织和管理方案来提高缓存利用率才是设计性能和成本均可接受的片上网络的解决办法。为此，研究者们提出了一类动态缓存分配的片上网络方案\cite{NPKV06}\cite{4555894}\cite{5770788}\cite{Neishaburi:2009:RAN:1531542.1531658}\cite{6310960}。 在这类体系结构中，路由器的每个端口仍然有相同数量的虚通道，但是每个虚通道所使用的缓存空间则是根据其对缓存的不同需求动态分配的。在相同的性能需要前提下，这类结构所需要的缓存容量仅为经典路由器结构的50\%。之后提出的端口间缓存共享方案\cite{Neishaburi:2009:RAN:1531542.1531658}\cite{5770788} 将动态缓存管理由端口内拓展到端口之间，进一步提升了路由器缓存资源的利用率。这类方案中，某个端口空闲的缓存可以被其它的端口使用，但是每个端口所能使用的虚通道的数量仍然是固定的。然而我们研究发现，在某些情况下，仅实现了端口内和端口间的缓存共享通常是无法最大化片上网络的性能的。图\ref{vcensuficent}以一个采用维序路由的3x3 mesh网络中的热点通信模式为例说明了这一点。节点9和3的报文由于路由器5的端口N和S此刻没有足够的虚通道可用因而造成了阻塞，此时这两个端口的缓存也可不能得到有效的利用。而与此同时，路由器5 的W 和E 端口却有空闲的虚通道。
+\end{comment}
+\begin{figure}
+  \centering
+  \subfloat[All-to-1 Communication]{\includegraphics[scale=0.45]{figures/center.pdf}\label{center}}\hspace{10pt}
+  \subfloat[VC Status of Router 5]{\includegraphics[scale=0.20]{figures/vcensufficient.pdf}\label{vcunbalance}}
+  \caption{Blocking caused by VC insufficiency}\label{vcensuficent}
+\end{figure}
 
-因此，减少缓存容量并采用有效的缓存组织和管理方案来提高缓存利用率是设计能量高效的片上网络的关键。为了实现以较低的硬件成本和功耗实现较高的性能，研究者们提出了一类动态缓存分配的片上网络方案，例如\cite{NPKV06}\cite{4555894}\cite{5770788}\cite{Neishaburi:2009:RAN:1531542.1531658}\cite{6310960}。在这类体系结构中，路由器的每个端口仍然有相同数量的虚通道，但是每个虚通道所使用的缓存空间则是动态分配的。然而，光有动态缓存管理和端口间缓存共享通常是无法最大化片上网络的性能的。画一个图说明光有缓存动态管理和端口间共享是不够的，似如２个端口的所有vc都向同一个输出端口转发报文。vc是维持报文内部切片以正确的顺序传输的有效手段。如果因为某些原因，已经分配了vc的报文因某些原因被阻塞而无法前进，那么此时即使没有分配到vc的报文在前方没有阻塞也不能朝前，因为他没有可以使用的vc。另外在这种情况下，下游的缓存也将被闲置。
+To avoid the blocking caused by VC insufficiency, an intuitive solution is that reserving large amount of VCs for each input port to meet the worst-case VCs requirement. However, this solution is infeasible due to the follow two reasons: first, it introduces significant hardware overhead to manage and keep the status of each VC; second, it makes the VC allocator (VCA) and SWitch Allocator (SWA) very complex and further limits the frequency of router, because these two components usually lay on the critical path of entire router pipeline. We also noticed that, the port utilization of VC and switch allocator in the typical router micro-architecture is very low. For a $N\times N$ mesh network, supposing each router has $P$ input port, and each port has $V$ VCs. Then, the average port utilization of VC allocator when the network is unsaturated can be defined as:
+$$\rho=\frac{1}{N^2PV}\times \sum_{n=1}^N\sum_{p=1}^P\sum_{v=1}^V\frac{ActiveCycles_{n,p,v}}{SampleCycles}$$
+where $SampleCycles$ is the length of sample period in cycles and $ActiveCycles_{n,p,v}$ is the number of cycles that the $p$th allocator port of $p$th port in router $n$ receives a request. For the many-to-1 communication scheme shown in Fig. \ref{vcensuficent}, supposing each input port of router is deployed with 16 buffer slots and 2 VCs. We change the packet length $L$ from 2 flits to 16 flits, and collect the port utilization of VC allocator under different injection rate. As indicated in Fig. \ref{utilization}, the average port utilization of VC allocator is very poor, and it decreases significantly while increasing the packet length. This observation motivates us to design new VC and switch allocator structure to improve the port utilization, because this improvement makes it possible to meet the same arbitration demands with lower hardware cost.
+\begin{figure}
+\centering\includegraphics[scale=0.5]{figures/util.eps}
+\caption{The port utilization of VC allocator under different injection rate and packet length.}\label{utilization}
+\end{figure}
+\begin{comment}
+为了减少或者避免因虚通道不足引起的阻塞，一个直接的办法是为每个端口预留大量的虚通道以保证在路由器在最差情况下的性能。但是存在以下两个问题：一方面维护大量的虚通道状态会引入了较大的硬件开销，另一方面虚通道分配器和交换机分配器复杂度的提高也会进一步限制片上网络所支持的最高频率。由于某个网络端口在某个时刻所需要的虚通道的数量等于该端口当前所要容纳的不完全报文的数量，因此片上网络中不同的端口所需要的虚通道数量是随机流量模式和时间动态变化的\cite{1420211}。
+\end{comment}
 
-因此，只有在vc数量够用的情况下，实现端口间和端口内的缓存动态管理才能够从根本上提高和改进buffer的利用率，以实现用最少的buffer来实现最高的性能。引入虚通道的目的是复用物理通道提高吞吐率的。因虚通道分配失败而造成的性能开销要比缓存不足引起的流量控制阻塞造成的开销大很多，特别是当报文长度很长时，因为为了防止报文交叠，只有当某个报文的尾切片已经被正在输出以后该虚通道才能被分配给新的报文使用.　
+In this paper, we propose an inter-port Adaptive VC and buffer Sharing NoC micro-architecture (AVCS-NoC), which alleviates the blocking caused by both flow control and VC insufficiency and improve network performance. Our approach reserves some buffer and VC resource for each input port and leaves the other buffer and VC shared by all the input ports. Under low traffic load, the private buffer and VC are sufficient to hold the incoming packets that can not been forwarded immediately. While under high traffic load, the shared VC and buffer can be employed to alleviate the blocking caused by both flow control and VC insufficiency. Another contribution of this paper is that we proposed the idea of allocator port sharing to decrease the complexity of VCA and SWA, which employs a smaller allocator than the typical router to arbitrate among large amount of VC request. All the newly added hardware components in our approach works in parallel with the original router pipeline, which introduces no negative effect to the frequency.
+\begin{comment}
+为此，我们提出一种结合的端口间缓存和虚通道共享的片上网络体系结构，通过降低每个端口的报文因流量控制和vc分配失败造成的阻塞和停顿来改进平均网络延迟并提升吞吐率。我们的方案为每个端口分配一定数量的私有VC和缓存容量，并在端口之间共享一定数量的动态VC和缓存。 当某个端口的负责较轻时，私有VC和缓存足够支持切片数据的无阻塞移动。而当某些端口的负载较重时，共享的buffer和虚通道则可以用来缓存大量的切片。另外，为了降低虚通道分配器和交换机分配器的复杂度，我们提出了影子vc的概念，使得可以用较小规模的仲裁器来实现对大量vc的仲裁，从而使得vc和sw 仲裁器的利用率和最高工作频率成为可能。与之前vichar\cite{NPKV06}等动态缓存管理方案不同的是，我们的方案基于传统的路由器结构进行修改得到，不需要对整个路由器结构进行重新设计和实现。而且新增加的共享缓存分配模块与路由器流水线并行的独立的操作，不会对路由器的关键路径产生不利的影响。
+\end{comment}
 
-片上网络中不同的端口所需要的虚通道数量是随机流量模式和时间动态变化的，因为因此某个端口实际需要的虚通道的数量等于该端口所要容纳的不完全报文的数量。为了最大化性能，我们希望虚通道越多越好。因此，之前的方案中\cite{NPKV06}\cite{4555894}\cite{5770788}\cite{Neishaburi:2009:RAN:1531542.1531658}\cite{6310960}，为了保证最差情况下的虚通道需求，通常为每个端口设置非常大多的虚通道数量。但是，虚通道规模的增加使得vc仲裁器和sw仲裁器的实现变得非常复杂，也进一步限制了片上网络所能达到的工作频率，因为这两人个阶段通常处于片上网络时钟的关键路径上。因此，设计合理的方案来动态的分配和管理虚通道是对改进性能非常有帮助的。
-
-本文中，我们提出一种新的片上网络体系结构，即通过端口间缓存和vc的动态共享来降低每个端口的报文因vc分配失败造成的阻塞和停顿，进而降低平均端到端延迟提升吞吐率。我们的方案采用部分动态的VC共享方式，每个端口分配一定数量的容量较小的静态VC，端口之间共享一定数量的动态VC。我们方案对上述几个问题的解决方法：（1）当某个端口的流量较少时，静态分配的VC足够支持切片数据的无阻塞移动。而当某些端口的流量较多时，共享的buffer则可以用来缓存大量的切片。（２）由于静态分配的VC相当于是为每个端口预留的配额，因而可以有效的避免共享缓存被某个端口耗尽时对低速端口的影响。（３）为了减轻VCA段的压力，我们提出了影子vc的概念，使得可以用较小规模的仲裁器来实现对大量vc的仲裁，进而提高了vc和sw仲裁器的利用率和最高工作频率。（４）我们所有的新增的硬件都可以并行的独立的操作，因而不对路由器的关键路径产生不利的影响；（５）我们的方案基于传统的路由器结构进行修改得到，不需要像vichar一样对整个路由器结构进行重新设计和实现。
-
-本文余下章节的安排如下：第\ref{related}节介绍相关的研究现状，第\ref{implemented}节介绍我们提出的路由器体系结构,相关的实验结果在第\ref{experiments}节给出。最后，我们在第\ref{conc}节对本文进行总结。
+The reset of this paper is organized as follows: A summary of related work follows in Section \ref{related}; We introduce the micro-architecture of PVCS-NoC in Section \ref{implemented}; Related experimental results are presented in Section \ref{experiemnts}. Finally, we conclude this paper and give the future work in Section \ref{conc}.
+\begin{comment}
+本文余下章节的安排如下：第\ref{related}节介绍相关的研究现状，第\ref{implemented}节介绍我们提出的路由器体系结构,相关的实验结果在第
+\ref{experiemnts}节给出。最后，我们在第\ref{conc}节对本文进行总结并指出futher work。
+\end{comment}
 
 \section{Related Work}\label{related}
-有研究表明，input buffers account for a large fraction of the overall area and power budget of typical Network-on-Chip，而且存储一个报文消耗的能量要多于在链路上传输所消耗的能量\cite{1012681}。因此，减少缓存容量并提高缓存利用率是在保证性能的前提下降低片上网络功耗和实现开销的唯一办法。Proper buffer sizing and organization are essential to increase buffer utilization. 静态的缓存分配方法使得在不同的流量模式下，大量的存储资源得不到有效的利用。为了改进提高缓存利用率并提高性能，一些虚通道动态缓存分配的体系结构已经被提出。
+The buffers located at each input port of a router account for a large fraction of the overall area and power budget of typical NoC router \cite{1650108}\cite{ChPe03}. Thus, reduce the buffer capacity and improve the buffer utilization is essential to implement a high performance NoC without introducing significant hardware overhead. Proper buffer sizing and organization are essential to increase the buffer utilization of wormhole switched NoC. There have been significant works to address this problem, and several dynamical buffer structure have been proposed.
+\begin{comment}
+有研究表明，input buffers account for a large fraction of the overall area and power budget of typical Network-on-Chip\cite{1650108}\cite{ChPe03}，而且存储一个报文消耗的能量要多于在链路上传输所消耗的能量\cite{1012681}。因此，减少缓存容量并提高缓存利用率是在保证性能的前提下降低片上网络功耗和实现开销的唯一办法。Proper buffer sizing and organization are essential to increase buffer utilization. 为了解决静态的缓存分配方法缓存利用率低的问题，一些虚通道动态缓存分配的体系结构已经被提出。
+\end{comment}
 
-Virtual Channel Regulator (ViChaR) was proposed in \cite{NPKV06}, which utilize a table based unified buffer structure to dynamically allocate the buffer resource for each virtual channel according to the traffic condition. TAMS的硕士论文中指出，ViChaR的方式提高了一个端口内部的buffer利用率，但是也提高了设计的复杂性和功耗。　A novel Dynamically Allocated Multiple Queue (DAMQ) was proposed for NoC systems \cite{liu2006shared}, which provides the same performance while keep the hardware cost very low. To eliminate the additional three-cycle delay of conventional DAMQ, a prefetch mechanism for DAMQ is proposed in \cite{6310960}. In \cite{4555894}, the authors proposed an linked list based buffer structure and a congestion avoidance scheme to improve the network performance and reduce the power and area cost of NoC.　前面提到的方法只解决了端口内的缓存区动态分配问题,  in \cite{Neishaburi:2009:RAN:1531542.1531658}\cite{5770788}, Inter-port buffer sharing was proposed to further improve the buffer utilization of entire router. 其中，MH提出的RAVC方法虽然支持动态VC容量以避免HoL，但是控制罗男过于复杂，硬件成本过高，需要大量的额外的存储器和寄存器文件来存储控制信息,而且ＲＡＶＡ的方法基于Ｖichar的方法，只能用于固定报文长度。　Accordingly, An similar inter-port buffer-stealing scheme for the normal router without VC was proposed in \cite{5722177}. To avoid addition control cost of fine-grained buffer sharing, a Partial Virtual Channel Sharing NoC (PVS-NoC) is proposed in \cite{5739053}. 该方法假设某些路由端口之前有一部分FIFO是可以被两个端口共享的；An Virtual Channel Renaming mechanism is proposed in \cite{6296442} for NoC to virtualize the physical VC and increase the robustness of NoC in case of failure.另外，为了避免一个病态的数据流占用较多的缓存空间而引起的性能下降，an adaptive backpressure机制在\cite{BeckerJMD12}中提出。对于端口间的动态缓存管理，还有一类粗粒度的共享方法，该类方法采用较多的分布式buffer来模拟输出缓存的交换结构\cite{Soteriou:2009:HDS:1591872.1591936}，但是其设计目的是提出吞吐率，其缓存利用率和功耗效率很低。
+Virtual Channel Regulator (ViChaR) was proposed in \cite{NPKV06}, which utilizes a table-based Unified Buffer Structure (UBS) to dynamically allocate the buffer slots for each VC according to the traffic conditions. Although the buffer utilization is greatly improved, it introduces significant power burden. A novel Dynamically Allocated Multiple Queue (DAMQ) was proposed for NoC systems \cite{liu2006shared}, which provides the same performance while keep the hardware cost very low. To eliminate the additional three-cycle delay of conventional DAMQ structure, a prefetch mechanism was proposed in \cite{6310960}. In \cite{4555894}, the authors proposed a linked-list based buffer structure and a congestion avoidance scheme to improve the network performance and reduce the power and area cost of NoC.
 
-所有这类动态VC分配方案的本质是为每个端口分配大量的VC，并实现同一个端口内的不同VC的动态缓存分配（为了防止死锁，每个VC需要至少保留一个缓存空间,剩余的缓存空间则可以在不同的VC之间进行动态的分配。) 由于虚通道的规模可以保证在最差情况下的性能，在实现运行过程中虚通道和交换机分配器的端口的利用率是非常低的。另外，在X-Y路由条件下，X方向更加容易拥塞，这种不均衡也导致之前的均匀分布vc的方案存在很大的问题。只有同时结合了端口间动态缓存管理和虚通道管理，才可以使用有限的硬件资源同时降低流量控制阻塞，交换机分配阻塞和虚通道分配阻塞。本文中我们便实现了这样一种方式。
+In \cite{Neishaburi:2009:RAN:1531542.1531658}\cite{5770788}, inter-port buffer sharing was proposed to further improve the buffer utilization of typical router. The control logic of this fully shared scheme is more complex than the intro-port buffer sharing schemes and introduces significant hardware overhead. Accordingly, a similar inter-port buffer-stealing scheme for the normal router without VC was proposed in \cite{5722177}. To alleviate the addition control overhead of fine-grained buffer sharing, a Partial Virtual Channel Sharing NoC (PVS-NoC) was proposed in \cite{5739053}, which shares some FIFO buffer between neighbor input port. An VC renaming mechanism was proposed in \cite{6296442} for NoC to virtualize the physical VC and increase the robustness of NoC in case of failure. In addition, to alleviate the performance degradation caused by coupling among VCs, an adaptive back-pressure mechanism was proposed in \cite{BeckerJMD12}.
+\begin{comment}
+Virtual Channel Regulator (ViChaR) was proposed in \cite{NPKV06}, which utilize a table based unified buffer structure （UBS) to dynamically allocate the buffer resource for each virtual channel according to the traffic condition. 尽管提高了一个端口内部的buffer 利用率\cite{Park2008}，ViChaR也提高了设计的复杂性和功耗。A novel Dynamically Allocated Multiple Queue (DAMQ) was proposed for NoC systems \cite{liu2006shared}, which provides the same performance while keep the hardware cost very low. To eliminate the additional three-cycle delay of conventional DAMQ, a prefetch mechanism for DAMQ is proposed in \cite{6310960}. In \cite{4555894}, the authors proposed an linked list based buffer structure and a congestion avoidance scheme to improve the network performance and reduce the power and area cost of NoC.前面提到的方法只解决了端口内的缓存区动态分配问题, in \cite{Neishaburi:2009:RAN:1531542.1531658}\cite{5770788}, Inter-port buffer sharing was proposed to further improve the buffer utilization of entire router. 其中，MH提出的RAVC方法虽然支持动态VC容量以避免HoL，但是控制罗男过于复杂，硬件成本过高，需要大量的额外的存储器和寄存器文件来存储控制信息,而且ＲＡＶＡ的方法基于Ｖichar的方法，只能用于固定报文长度。Accordingly, An similar inter-port buffer-stealing scheme for the normal router without VC was proposed in \cite{5722177}. To avoid addition control cost of fine-grained buffer sharing, a Partial Virtual Channel Sharing NoC (PVS-NoC) is proposed in \cite{5739053}. 该方法假设某些路由端口之前有一部分FIFO是可以被两个端口共享的；An Virtual Channel Renaming mechanism is proposed in \cite{6296442} for NoC to virtualize the physical VC and increase the robustness of NoC in case of failure.另外，为了避免一个病态的数据流占用较多的缓存空间而引起的性能下降，an adaptive backpressure机制在\cite{BeckerJMD12}中提出。对于端口间的动态缓存管理，还有一类粗粒度的共享方法，该类方法采用较多的分布式buffer来模拟输出缓存的交换结构\cite{Soteriou:2009:HDS:1591872.1591936}以提高吞吐率，但是其缓存利用率和功耗效率很低。
+\end{comment}
 
-\section{路由器体系结构}\label{implemented}
-完全的端口间缓存共享存在２个关键的问题：（１）需要较多的控制存储器，我们将在第\ref{comp}小节进行理论分析；
-以3x3的mesh网络为例，在热点流量情况下（中间节点为热点）来说，热点的N和S端口接受的流量是W和E的3倍。因而如果能让W和E端口使用更多的buffer，那么那么对于因减少流量控制造成的stall而引起的大的延迟是非常有好处的。为了防止某些病态流占用所有的空间，最理想的办法是令每个端口使用$B_p=B_{total}\times\frac{C_p}{\sum_{p=1}^NC_p}$的buffer.然后对于每个端口所能使用的$B_p$个slot进行动态的管理。此外，端口间的buffer共享还有利于改进公平性以及不同数据流的吞吐率。
+The common characteristic of all these buffer sharing schemes is that they only share the buffer resource and reserving large amount of VC for each input port to guarantee the worst case performance. Whereas, these statically allocated VC scheme introduces significant hardware overhead and the utilization of VC and switch allocator is very low. In addition, under some real-world traffic pattern, the even distributed VC architecture is low efficient due to lack of VC at some input ports. Thus, only combining the buffer sharing and VC sharing can we implement a high performance router without introducing high hardware overhead.
+\begin{comment}
+所有这类动态VC分配方案的本质是为每个端口分配大量的VC，并实现同一个端口内的不同VC的动态缓存分配. 由于虚通道的规模可以保证在最差情况下的性能，在实现运行过程中虚通道和交换机分配器的端口的利用率是非常低的。另外，在X-Y路由条件下，X方向更加容易拥塞\cite{KiNP06}，这种不均衡也导致之前的均匀和静态vc分布方案存在很大的问题。因此，只有同时结合了端口间动态缓存和虚通道共享，才可以使用有限的硬件资源同时降低流量控制阻塞，交换机分配阻塞和虚通道分配阻塞。本文中我们便实现了这样一种方式。
+\end{comment}
 
-\subsection{Key architectural Conribution}
-为了以较低的成本增强典型片上网络的性能，我们必须提高缓存的利用率，这就需要我们能够对路由器内部每个端口以及每个端口中每个虚通道的缓存都进行有效的动态管理和共享。除此之外，我们需要提供较多的虚通道数量这样才能保证尽可能减少因虚通道不足引起的阻塞。在全文的主题上，我们的目标是通过动态的共享虚通道和缓存来提高吞吐率降低平均端到端延迟，而之前的很多方案都是单纯的提如何提高缓存利用率并降低延迟。在具体的实现过程中，我们还要在实现的复杂度和资源的利用率之前进行折衷。
+\section{Proposed AVCS-NoC Micro-Architecture}\label{implemented}
+\subsection{Key Design Consideration}
+Virtual channel provides a way to multiplex the physical channel in wormhole switched NoC to reduce the Head-of-Line (HoL) blocking. In avoid packets interleaving, a VC can be reallocated only when the previous packet has been completely received. If the packet occupying a VC is blocked due to some reason, this VC keeps on idle and can not be utilized by other packets. Thus, the degradation caused by VC insufficiency is much serious than that of flow control, especially when the packet is very long. One of the solution to this problem is that reserving large amount of VCs for each input, e.g. \cite{NPKV06}\cite{4555894}\cite{5770788}\cite{Neishaburi:2009:RAN:1531542.1531658}\cite{6310960}. Whereas, it makes the VC and switch allocator very complex, and a large amount of registers should be used to track the state of each VC. Another promising approach is by sharing the buffer and VCs among all the input ports, and allocate the buffer and VCs dynamically on demand according to the traffic conditions and the VC status of each input port.
 
-当需要进行VC间缓存共享时，通常的情况是这个端口已经很堵，因则借助端口内的缓存共享来改进性能的性能提升已经非常有限，而端口间缓存共享则没有这个问题。因为应用通常会呈现出流量在同一个路由器的不同端口间的不均衡分布情况，因而采用端口间共享对改进吞吐率有好处。
+While designing the inter-port buffer and VC sharing scheme, the following four issues profoundly affect the design consideration of our AVCS-NoC micro-architecture:
+\begin{comment}
+vc是维持报文内部切片以正确的顺序传输的有效手段。为了防止报文交叠，只有当某个报文的尾切片已经被正在输出以后该虚通道才能被分配给新的报文使用。如果因为某些原因，已经分配了vc的报文因某些原因被阻塞而无法前进，那么此时没有分配到vc的报文在即使前方没有阻塞也无法传输。因此，因虚通道不足引起的阻塞对网络性能的影响远远大于因流量控制引起的拥塞，特别是当报文长度很长时。解决需通道阻塞的一个办法是为每个端口预留大量的虚通道，例如\cite{NPKV06}\cite{4555894}\cite{5770788}\cite{Neishaburi:2009:RAN:1531542.1531658}\cite{6310960}。 但是这会使得虚通道分配和交换机仲裁变得十分复杂。另外，为每个端口预留大量的虚通道也会消耗大量的寄存器资源来跟踪与该vc相关的报文的情况及传输状态等。另一种promising的方法是，在路由器端口之间实现虚通道和缓存共享，在运行过程中根据每个端口的流量和虚通道使用情况来动态的为每个端口分配虚通道和缓存。但是，在设计端口间缓存共享的方案时还有以下几个问题需要考虑：
+\end{comment}
+\begin{enumerate}
+\item Interference caused by buffer sharing: When the buffer resource are shared among all the input ports, an adversarial workload injected from one input port might monopolize all the buffer space of other input ports and cause global congestion. Thus, special care should be taken to prevent the buffer blockage from spreading to the other ports.
+\begin{comment}
+（1）因端口间缓存共享带来的interference问题。在\cite{BeckerJMD12}中作者揭示了端口内动态缓存管理方案中因为个别虚通道占用所有缓存空间使得其它数据流产生流量控制阻塞而造成的性能下降现象。类似的现象在完全端口间缓存共享时也会出现，考虑某个端口将其它端口的缓存区全部占用时带来的性能下降。
+\end{comment}
+\item Read/Write conflicts caused by buffer sharing: Since each input buffer can be accessed by multiple input ports, potential conflicts might occur when multiple input ports trying to write flits to or read flits from the same buffer. Thus, additional read/write control logic should be implemented to avoid hazard.
+\begin{comment}
+（2）共享存储体的读写冲突问题。在实现端口间缓存共享时，需要认真考虑因几个端口同时对同一个共享存储体进行读写时可能出现的冲突。
+\end{comment}
+\item Trade-off between hardware overhead and performance: Although the inter-port buffer sharing can further improve the performance of typical router, additional hardware overhead increases significantly. Thus, the trade-off between performance and hardware overhead is necessary to design a high performance router with acceptable hardware overhead.
+\begin{comment}
+（3）端口间缓存共享的硬件成本和潜在的性能优势。完全缓存共享可以最大限度的利用路由器的缓存资源以减少因流量控制造成性能下降，但是会引入巨大的硬件开销。在设计时需要在成本和性能之间进行折中。
+\end{comment}
+\item The complexity of VC and switch allocator: When the inter-port VC sharing is implemented, the maximal number of VC each input port can use is equal to the number of private VCs plus the number of shared VC, which is larger than that of non-shared scheme. Thus, special care should be taken while designing these two allocators, since they usually occupy large chip area and restrict the frequency of router.
+\begin{comment}
+（4）虚通道和交换分配器的规模问题。对于每个路由器端口来说，它能使用的最大的虚通道数量$V_{max}$等于私有虚通道的数量加上共享虚通道的数量，远远大于没有实现共享的方案。规模庞大的虚通道和交换机分配器会占用大量的芯片面积并影响路由器所能支持的最高频率。
+\end{comment}
+\end{enumerate}
 
-\subsection{提出的微体系结构}
-为此，我们提出了该体系结构，如图所示。该体系结构包含以下几个重要的模块。1.流量控制模块：负责信约的生成、信约跟踪；2.共享buffer的监控模块，负责对共享缓存的虚通道的分配与释放，读写地址和控制信号的译码以及队列空满检测模块；3.拥塞的检测模块和共享buffer分配模块，负责对每个端口的拥塞状况进行动态的监控和对缓存的分配；４.虚通道和交换机的仲裁模块，负责在影子vc和实际vc之间的仲裁和分配。我们将在以下的小节中分别进行介绍。
+\subsection{Proposed Micro-architecture}
+Taking all these aspects into consideration, we proposed the Adaptive VC Sharing NoC micro-architecture (AVCS-NoC), as shown in Fig. \ref{architecture}. This proposal realizes the partial buffer and VC sharing: each input port contributes a small portion of their buffer and VCs resource to form the shared buffer banks, which can be accessed by all the input ports of a router. For an AVCS-NoC router with five input ports, there are five banks in total, and each bank manages their own buffer space independently. The owner of each shared buffer bank is determined by their own shared buffer allocator ($\textcircled{4}$ in Fig. \ref{architecture}). The buffer allocator is a Finite State Machine (FSM), it grants a new owner according to the traffic conditions of each port whenever this bank keeps idle for several cycles.
+\begin{figure*}
+  \centering
+  \subfloat[Proposed AVCS-NoC micro-architecture.]{\includegraphics[scale=0.45]{figures/architecture.pdf}\label{architecture}}\hspace{10pt}
+  \subfloat[The internal structure of shared/private buffer]{\includegraphics[scale=0.65]{figures/linklist.pdf}\label{linklist}}
+  \caption{The proposed AVCS-NoC architecture and the buffer mangement scheme}
+\end{figure*}
 
-我们的设计方案是在典型路由器结构的基础增加一些对共享缓存的控制和分配模块形成的。我们的方案为每个端口预留一定量的VC，然后剩余的VC被所有的端口共享。这样做的原因是为了为每个端口保证一定的吞吐率和带宽以避免当该端口出现猝发流量时没有可用VC的情况。预留不同数量的VC最终的性能是不同的，对于不同的流量模式可以进行多次实验找出最优的组合。这种部分虚通道共享方案对于热点流量效果会比较好，而热点流量又恰好对应于CMP系统中的MC或home节点。共享的buffer分成几个bank，用以支持动态的VC分配和端口间的缓存调整。这些共享的存储体每一个都独立的检测不同输入端口的流量状态（这些流量状态由若干个统计计数器来实现），并通过协商来确定每个存储体的分配方式以及分配的实际地址段。用若干个有限状态机来检测每个端口的拥塞情况并根据一定的策略动态的将空闲的bank分配给指定的比较忙碌的端口使用。在具体的实现过程中，我们可以动态的改进对指定Memory bank采用的控制策略，以适应不同流量模式的特点并提高其吞吐率。
+After buffer allocation, the allocation results are sent to the upstream routers by raising the shared\_buffer\_grant signal. Each output port of upstream router updates the shared VC state upon receiving the signal. The shared VC are allocated at the granularity of bank, only when a buffer bank is granted to an input port, the corresponding shared VC can be allocated at upstream router. The switch allocator schedules the flits located at both shared VC and private VC to traverse the crossbar and enter the input port of downstream router. Upon arriving the input port of a router, a flit is written into the shared/private buffer according to the shared\_vc signal. Each shared buffer bank utilizes a multiplexer ($\textcircled{5}$ in Fig. \ref{architecture}) controlled by the shared buffer allocator to select the flits coming from the owner port. Similarly, each input port of the crossbar uses a multiplexer ($\textcircled{6}$ in Fig. \ref{architecture}) controlled by the switch allocator to select the flits from either private buffer or one of the shared buffers.
 
-为了支持这一改变，我们的方案中每个共享的bank输出５根线用于表示当前bank授权给评谁用。在路由器的每个输出端口上也有５根线用于表示这５个bank在该端口的可用性。信约控制模块也要进行相应的改变，每个端口增加N个信约计数器用于跟踪共享vc在当前端口的可用性。另外，还需要在每两个路由器之间增加两根信号线credit\_for\_shared用于表示当前反馈的信约是共享vc的还是私有vc的。为了标识每个输入的切片是否要注入实际vc还是影子vc，我们还需要增加１根输入信号线shared\_vc用于表明当前的vc id是针对私有vc的还是共享vc的。
+The credit based flow control requires a credit receiving module at the output port of a router and a credit generating module at the input port of downstream router. In our AVCS-NoC architecture, since the private buffer and shared buffer are managed independently, we need a dedicated credit counter for each memory bank. To distinguish whether the credit is for the shared VC, an additional signal credit\_for\_shared\_vc driven by credit generator is connected to the corresponding credit receiver besides the credit\_valid and credit\_value signal.
+\begin{comment}
+基于信约的流量控制由两部分组成，一部分是位于路由器输出端口处的信约接收模块，一部分是位于下流路由器输入端口中的信约生成模块。信约生成模块则根据交换机仲裁的结果向上游路由器反馈信约，而信约接收模块则会根据反馈的信约来更新信约计数器。在我们的AVCS结构中，由于私有缓存和共享缓存是独立管理的，因此在信约接收模块中除了有一个针对私有缓存的信约计算器以外，还需要为每个共享的存储体设置一个独立的信约计数器。而信约生成模块在反馈信约时还需要标明当前信约是私有信约还是共享信约。如果反馈的是共享信约，那么信约接收模块会根据信约中携带的共享缓存ID更新相应的共享信约计算器。由于信约为零存储体不能接收新的切片，因此信约计算器的值会作为交换机分配的参考。
+\end{comment}
 
-总起来说，我们的方案与conventional router相比实现的性能提升源于以下四个方面：（1）实现了动态的vc分配，提高了缓存的利用率，可以利用较少的缓存资源实现同样的性能；（2）实现了vc分配器的共享，进而降低了va的复杂度和实现成本；（3）实现了端口间的vc共享，通过发现不同端口间对vc数量的不同需求和共享，我们的方案实现了端口间vc共享进而降低了因vc不足造成的阻塞；（4）我们的方案通过发现不同端口间对缓存容量的不同需要，动态的分配缓存资源到不同的端口，因而实现了资源的高效利用并以此来提高片上网络的性能。
+To improve the performance with smaller buffer space, we must manage and allocate the buffer resource dynamically according to the traffic conditions. Two methods for this aim include the Unified Buffer Structure (UBS) based \cite{NPKV06}\cite{5770788} and the linked-list based \cite{4555894}\cite{Neishaburi:2009:RAN:1531542.1531658} dynamical buffer management scheme. Since the UBS is only applicable to the fixed-length packet network, we adapt the linked-list based management scheme for both shared memory bank and the private buffer in our approach to guarantee the buffer utilization. Five tables are necessary to implement the linked-list based buffer management scheme, as shown in Fig. \ref{linklist}. A Next Pointers Table records the next slot address for each buffer slot; A Tail Pointers Table maintains the writing address of each VC; A Header Pointers Table keeps the reading address for each VC; A Free Slots Table tracks the address of all the unused buffer slot; In addition, a VC State Table is used to identify the occupied VCs.
+\begin{comment}
+我们的设计方案是在典型路由器结构的基础增加和共享缓存和一些对共享缓存的控制和分配模块形成的。为了以较少的缓存空间提高典型片上网络的性能，我们必须提高对共享缓存的利用率，这就需要我们能够对路由器内部每个端口以及每个端口中每个虚通道的缓存都进行有效的动态管理和共享。目前两类动态缓存管理方案是UBC\cite{NPKV06}和基于链表\cite{4555894}\cite{Neishaburi:2009:RAN:1531542.1531658}\cite{5770788} 的方式，UBC 只能用于固定报文长度而基于链表的方式则没有这些限制。因此本文采用基于链表的方式来管理both shared memory bank and the private buffer to guarantee the buffer utilization。 基于链表的组织方式需要为每一个buffer slot 增加一个next slot pointer,并为每个虚通道提供一个tail 和head 指针，同时提供一个fifo 结构来跟踪空闲的slot，如图\ref{linklist}所示。
+\end{comment}
 
-\subsection{VC和SW仲裁器}
-之前的方案仅实现了对缓存的动态分配和共享而没有实现vc的共享。然而我们发现因vc不足造成的阻塞要远远比缓存不足造成的后果要严重。考虑某种情况，当某条流在某个路由器中发生VC阻塞时，该条流会在路由器中积压大量的切片，而切片在缓存区中的积压会将该数据流转变成为恶意数据流。而且这种影响随着报文长度的增加而越发明显。造成这一现象的原因则是因为虚通道分配失败。
+The main difference between the typical router and our proposal lies in the buffer and VC organization, as shown in Fig. \ref{org}. For the same amount of buffer slots $B$, each input port in AVCS-NoC reserve $5/6B$ as private buffer and shares $B/6$ with the other input port. Meantime, the number of VCs within the shared buffer bank, i.e. $nVC=V_{max}/P$, are shared among all these input ports. The shared buffer can change their owner according to the traffic condition of each input port to improve the buffer utilization and network performance. While under low traffic load, the private buffer and VC of each input port is capable of delivering all the incoming traffic. Under high traffic load, if congestion occurred at some input port, the shared buffer of idle port will be designated to the congested port several cycles later to alleviate the congestion.. The amount of buffer space each input port can use lies between $5/6B$ and $10/6B$, in contrast to $B$ in typical router. The memory allocation module works in parallel with the router pipeline, which imposes no negative effect on the working frequency of entire router.
+\begin{comment}
 
-采用VC共享方案的本质原因是为了尽可以避免VC阻塞造成的性能下降。我们采用vc共享而不是像以前的方案一样为每个端口分配大量的虚通道的目的在于，受限于vc和sw分配器的实现复杂度，每个端口可用的vc数量是非常有限的。另外，受限于系统的设计成本，每个端口的缓存容量也是有限的。而系统所能达到的吞吐率与vc的数量以及缓存容量是正相关的，因此为了提高吞吐率需要较多的vc和缓存空间。但是不同端口的流量特点是不同的，在这种情况下，我们需要一种有效的机制来动态的共享vc和缓存并对其进行高效的分配和使用。
+我们PVCS结构会根据当前路由器每个端口的拥塞情况来动态的调整每个共享存储体所属的端口，在提高缓存利用率的同时最大化网络性能。当负载较轻时，每个端口的私有存储资源和虚通道便足够支持切片的传输。当某个端口发生拥塞时，某个空闲端口所拥有的共享缓存便会在苦干周期之后被重新分配给该端口以缓解拥塞。由于对共享存储模块的分配是与路由器流水线并行工作的，因此不会对对系统的频率产生不利的影响。
 
-在我们提出的体系结构中，路由器的每个端口所能使用的缓存空间有两个部分，一部分是每个端口私有的缓存，这一部分缓存通过链表的方式动态的进行管理；另一部分为所有端口动态管理的缓存，这一部分缓存由有限状态机进行动态的管理和分配。为了避免写冲突，要求这些缓存空间被分成若干个小的存储体，这些存储体可以被并行的读写。共享的缓存区被分成5个或是5的整数倍数存储体，我们对vc的分配以存储体为粒度，当某个存储体被分配给相应的端口后，这个存储体上所有的vc也相应的分配给该端口。当属于某个端口的共享存储中所有的vc都空闲时该存储体便可以被重新分配。因此，每个端口所能使用的虚通道的数量是动态变化的。为了支持对最差情况下（即每个端口拥有最大数量的虚通道）的虚通道分配和交换机分配，一种可选的方法是为每个路由器配置一个较大的虚通道分配和一个较大的交换机分配器。但是，这样会使得整个系统变得非常复杂而且还会限制系统所能达到的时钟频率。
-
-本文中，我们采用另一种新的方法。为此，我们提出了影子vc的概念。所谓影子vc是指那些属于共享缓存块的虚通道结构，为了限制虚通道和交换机分配器的规模，我们并不为这些影子vc预留专用的分配器端口，而是让这些虚通道复用私有vc的分配器端口。之所以称之为影子vc是因为我们的方案中影子vc与端口的私有vc共享同一个sw端口和va端口，这样即实现了对大规模vc的支持双降低了设计成本。而实际上这样的设计并没有降低系统的性能。因为被分配的VC在尾切片没有到达之前是不会grant任何请求的，分配器大部分时间都处于空闲状态，相应的端口可以被影子vc所使用。
-
-与之前提出的动态vc分配的方案相比，我们的方案由于利用了分配器的复用技术，进而实现了利用较小的allocator来实现对大量vc的分配和使用，在很大程度上降低了allocator的实现成本并降低了关键路径长度，对于提高系统的主频非常有好处。这样一来，我们的VCA的实现电路得到了极大的简化，画一张图给出对应的电路设计方法。我们采用的影子VC技术也在一定程度上简化了VCA和SWA的实现。
-
-关于VCA的实现，传统的方法在输入端采用V:1仲裁器，在输出端采用PV:1仲裁器；MH的方法输入端采用P个$V_{max}:1$ 仲裁器，输出端采用1个P:1仲裁器；而我们的方法，在输入端采用n个$V_i:1$仲裁器，其中（$\sum_{i}^nV_i=V_{max}$）,在输出端采用nP:1 仲裁器。采用几个小的仲裁器并行工作来代替一个较大的仲裁器的好处是降低硬件复杂度并易于提高主频。（考虑到同一个端口之间不需要进行匹配，能否利用n(P-1):1来代替）由于我们的方法在输入端有更多的请求胜出，因而更加有利于提高匹配的成功率。对于每个端口来说，每个时钟周期最多只有１个切片可以输出，因此只要分配一个输出vc即可以保证其吞吐率不受影响。由于我们的方法在VCA以及SWA上都有较高的匹配成功率，可以预见我们的路由器可以提供较高的吞吐率。每个下游节点的memory bank配置发生变化时都会通知VCA，VCA据此来屏蔽不能用的VC段。这样就不会存在冲突了。由于每个memory bank有独立的操控逻辑，因而我们支持的最大VC数可以比MH的方法要大。
+\end{comment}
 \begin{figure}
-\centering\includegraphics[scale=0.5]{figures/vcallocator.pdf}
-\caption{The Implementation of VC Allocator}\label{vcallocator}
+  \centering
+  \subfloat[AVCS-NoC]{\includegraphics[scale=0.25]{figures/avcsbuf.pdf}\label{avcsbuf}}\hspace{10pt}
+  \subfloat[typical router]{\includegraphics[scale=0.25]{figures/typicalbuf.pdf}\label{typicalbuf}}
+  \caption{Buffer organization of AVCS-NoC and typical router.}\label{org}
 \end{figure}
 
-同样的，我们的SWA也需要进行略微的修改。由于影子vc和私有vc共享同一个sw/va请求端口，因此我们需要在该端口上增加一个复选逻辑来选择一个请求输入到分配器中.修改后的sw仲裁器也是分为两人个附件，第一个阶段每个端口有1个5x/6:1的仲裁器用于从该端口中选择一个vc作为下一时钟的备选输出vc；另外，共享的5x/6个vc也有一个仲裁器，因此第一阶段我们有6个同样的仲裁器。第二阶段我们在每个输出端口放置1个6:1的仲裁器，用于从每一组仲裁结果中选择出一个vc进行切片传输可以看出，我们的sw分配器第二阶段采用5个相对较大的6:1仲裁器(原来的方案是5:1)，但是在第一附件每个仲裁器的规模都比原来的方案要小（但是原来的方案需要5个我们的方案需要6个）。
-\begin{figure}
-\centering\includegraphics[scale=0.5]{figures/swallocator.pdf}
-\caption{The Implementation of Switch Allocator}\label{swallocator}
+Our proposal resolves all the aforementioned questions:
+\begin{enumerate}
+\item This architecture is a partial buffer and VC sharing scheme, even when all the shared buffer is occupied by some input ports, the other ports can still use their private buffer to guarantee the transmission of packets, which alleviates the interference caused by inter-port buffer and VC sharing.
+\item The hardware overhead is much lower than the fully-shared scheme, which realized better trade-off between cost and performance.
+\item The shared buffer is divided into several small banks to support the parallel access. Each bank can only be granted to one input port at any time, which avoid the multiple read/write conflicts.
+\item In order to minimize the complexity and overhead of VC and switch allocator, we let the shared VC and private VC sharing the same allocator port, as explained in subsection \ref{allocmux}. This approach makes it possible to arbitrate large amount of VC use a smaller allocator, which reduces the complexity of VC and switch allocator significantly.
+\end{enumerate}
+
+In addition, our proposal can withstand the presence of faulty of both private and shared VCs, since a faulty private VC can be replaced by a non-faulty shadow VC, and a faulty shared VC does not interrupt the the functionality of corresponding private VC.
+\begin{comment}
+将上述几点考虑在内，我们提出了如图\ref{architecture} 所示的自适应端口间缓存和虚通道共享体系结构。该体系结构在路由器端口之间实现了缓存和虚通道的部分共享：每个端口保留一定数量的私有缓存和虚通道，还有一部分共享的缓存和虚通道在运行过程中按需分配给不同的端口使用。我们提出的结构有效的解决了上面提出的4个问题：1. 由于是部分共享的方案，私有缓存和虚通道相当于是为每个端口预留的配额，因而可以有效的缓解共享缓存被某个端口耗尽时对低速端口的干扰，有效的实现了端口间的流量隔离。2. 与完全共享方案相比，部分缓存共享引入的硬件开销较小，很好的实现了性能和成本之间的折衷。3. 我们将共享的缓存分成了若干个相互独立的存储体，每个存储体在任意时间都只能被一个端口使用，因此避免了可能的读写冲突。4. 为了解决分配的规模问题，我们提出了影子虚通道的概念，在不影响性能的情况下，通过分配器的端口复用来实现以较小的分配器实现对大量虚通道的分配和仲裁。之外，我们提出的方案还具有天然的容错特性：当某个端口的某些虚通道发生故障时，共享虚通道可以补充过来代替私有的虚通道进行数据传输。
+\end{comment}
+
+This micro-architecture is different from the previously proposed ViChaR \cite{NPKV06}, which need fully re-implement the router pipeline. Instead, our approach augments the typical router micro-architecture by adding a shared buffer allocation module for each shared buffer bank and re-implementing the VC and switch arbitration module, which will be introduced in the following two subsections.
+\begin{comment}
+与之前基于UBS的方案不同，我们的体系结构不需要对整个路由器流线进行重新设计，而是在经典路由器体系结构的基础上增加以下几个模块而形成的：1. 共享buffer 的分配和管理模块：负责对共享缓存和虚通道的分配与释放，读写地址和控制信号的译码以及队列空满检测模块，我们将在第
+\ref{bufmanage}小节进行介绍; 2. 虚通道和交换机的仲裁模块，负责在影子vc 和实际vc 之间的仲裁和分配,我们将在\ref{allocmux} 小节进行介绍；3. 共享存储体的流量控制模块：负责跟踪共享存储体的使用、生成信约和流量控制信号，我们将在第\ref{flowctrl}小节对该模块进行详细的介绍。
+\end{comment}
+
+\subsection{Shared Buffer Allocation Module}\label{bufmanage}
+The FSM of buffer allocator in AVCS-NoC has three states: Enable\_Allocation(EA), Disable\_Allocation(DA) and Change\_Allocation(CA), as shown in Fig. \ref{allocFSM}. The Ready\_for\_Allocation(RA) signals keep on valid while in Enable\_Allocation state, and the shared buffer and VCs can be used by this input port. When the shared buffer keeps on idle for $K$ cycles, we can infer that this input port does not need this shared buffer temporally. Thus, we can reallocate this buffer to another input port. The threshold $K$ is a design parameter, which affects the allocation of buffer among input port and the performance of entire network. For a real-world application, the optimal $K$ can be chosen by experiments. To avoid the buffer is allocated while changing status, the FSM first enters the Disable\_Allocation state. At this state, the ready\_for\_allocation (RA) signals goes down to disable the output VC allocation of upstream router. When the shared buffer is empty and no shared VC is allocated, the FSM enters the Change\_Allocation state. At this state, the buffer allocator chooses the new owner for the shared buffer according to the congestion status of each input port and the current owner of this bank (sbuf\_grant), as described in Alg. \ref{alg:bufferalloc}. Then, the FSM enters Enable\_Allocation state and begins another cycle.
+\begin{comment}
+在我们提出的AVCS结构中，共享的buffer分成5个或是5的整数倍个bank，用以支持动态的VC分配和端口间的缓存调整。由于每个存储体都独立寻址，因此在同样的缓存容量情况下，我们的方案较UBC\cite{NPKV06}和基于链表
+\cite{4555894}\cite{Neishaburi:2009:RAN:1531542.1531658}\cite{5770788} 方式更加节省控制存储空间，我们将在\ref{controllogic} 节通过比较来展现这一优势。我们对vc的分配以存储体为粒度，当某个存储体被分配给相应的端口后，这个存储体上所有的vc也相应的分配给该端口。为了支持这一改变，我们的方案中每个共享的bank 输出５根线用于表示当前bank 授权给评谁用。在路由器的每个输出端口上也有５根线用于表示这５个bank 在该端口的可用性。每个存储体都有一个独立的缓存分配器，通过对各个输入端口的缓存和虚通道占用情况进行监视，根据一定的策略动态的将空闲的bank 分配给指定的比较忙碌的端口使用。在具体的实现过程中，我们可以动态的改进对指定Memory bank 采用的控制策略，以适应不同流量模式的特点并提高其吞吐率。缓存分配器是一个有限状态机，状态机有3 个状态，Enable\_Allocation(EA), Disable\_Allocation(DA)和Change\_Allocation(CA)，如图\ref{allocFSM} 所示。
+\end{comment}
+\begin{comment}
+当处于enable allocation 状态时，Ready\_for\_Allocation(RA)信号有效，相应的存储体可以被相应的端口使用。当连续K个周期该共享存储体上所有的VC 都没有被分配而且共享缓存为空时，则认为当前端口暂时不需要该存储体，此时可以将该存储体重新分配给其它端口使用。阈值K是AVCS结构的一个额外的参数，它会影响共享存储体在各个端口之间的分布并最终对性能产生影响。在实际使用时，对于特定的应用可以通过实验来确定最佳的K值。为了防止在状态切换过程中被分配，有限状态机先进入disable allocation 状态，在该状态下向上游路由器发出unready for allocation信号，并在队列为空且虚通道没有被分配时进入下一个状态change allocation。在这个状态下，缓存分配器根据每个端口的拥塞情况按照轮转的方式选择下一个可以使用该存储的端口，选择下一下端口的算法如Alg.\ref{alg:bufferalloc}所示。在完成缓存分配后，状态机进入enable allocation状态。
+\end{comment}
+\begin{figure}[htb]
+  \begin{minipage}[b]{0.31\textwidth}
+    \centering\includegraphics[scale=0.65]{figures/allocFSM.pdf}
+    \caption{The FSM of buffer allocator}\label{allocFSM}
+  \end{minipage}%
+  \begin{minipage}[b]{0.2\textwidth}
+    \centering
+    \begin{tabular}{|c|c|}
+      \hline
+      Port & Encode \\
+      \hline\hline
+      East  & 10000 \\
+      \hline
+      West    & 01000 \\
+      \hline
+      South &   00100\\
+      \hline
+      North & 00010\\
+      \hline
+      Local & 00001\\
+      \hline
+    \end{tabular}
+    \caption{Port Encoding}\label{portencode}
+  \end{minipage}
 \end{figure}
 
-在我们的方案中，为了简化VC分配逻辑，我们在Vc分配和sw分配时给影子vc赋预较高的优先级，以让其尽快排空队列，以缩短采用和整个vc的分配周期，尽可能快的适应当前网络的流量状况。
-
-对于之前的共享VC方案，假设原来的动态VC方案中每个端口有x个VC，那么我们的方案每个端口设置5x/6个VC，另外还有5x/6个VC为各个端口间共享的。由于采用了影子vc和仲裁器端口复用，与之前的方案，对于同样的VC数量，每个VC仲裁器的复杂度则有所下降。由于我们实现了vc arbiter的复用,在我们的方案中，每个端口所能使用的vc数量在5x/6和10x/6之间，远远大于之前的设计方案，但是所用的vc分配器规模则远远小于之前的方案。我们的方案与vichar等方案的区别在于，尽管他们的vc也是动态分发的，但是没有实现端口间的共享。但是为了保证最差情况下的性能，每个端口都需要保存$V_{max}$个虚通道结构，vc,sw仲裁器也需要为$V_{max} \times V_{max}$规模以保证最差情况下的资源分配。而我们的方案只需要规模为$5/6V_{max}\times 5/6V_{max}$的分配器。
-
-片上网络中的两个分配器实现很复杂，但是当报文很长时，空闲的时间会很多，因此通过对vc和sw分配器的复用可以获得极大的好处。虽然我们的方法没有提高vc和sw分配器的匹配度（目前也有相关的研究），但是我们对每个分配器端口进行了复用，提高了其利用率，避免了闲置。达到了采用较少的vc和sw分配器实现了较大规模vc的分配目的。另外，由于每个端口可用的vc数量为$V_{min}$到$2V_{min}$之间，因而在一定程度上也缓解了因为vc分配失败所带来的开销。
-
-对于上面提到的separable vc allocator, 令报文长度为固定长度４个切片，我们采用4x4 mesh拓扑结构，维序路由算法，每个路由器５个端口。对于基准路由器结构，每个端口１２个vc，每个路由器分配的缓存容量为６０切片。相应的我们的路由器每个端口有１０个私有vc，另外还有１０个共享的vc，每个路由器分配的总的缓存容量也为６０切片，计数器长度３２位，预热和测量周期均为$10^5$拍。我们假设packet source的缓冲区无限大，暂时无法进入网络的报文将被缓存中源端。我们采用下面公式来比较两人种路由器体系结构中虚通道分配器的利用率：$$\rho=\frac{1}{NPV}\times \sum_1^N\sum_1^P\sum_1^V\frac{\#idlecycles}{\#totalcycles}$$.我们采用的流量模式为随机均匀模式，报文的注入过程为bernoulli过程，我们增加报文的注入速率从0.1$pkt/cycle$到0.2$pkt/cycle$，得到下图所示的分配器利用率以及端到端平均延迟的实验结果。通过实验结果发现，我们的方案采用较少的分配器实现了同样的功能，而系统的性能没有得到下降。但是分配器的利用率则得到了有效的提高。
+To simplify the allocation algorithm, we allocate the buffer bank to an input port in the round-robin order. Initially, these five buffer banks belongs to different input ports (Step 3 and Step 6). We also use a five bits port\_mask to filter out the ports can not be chosen as candidate at current allocation cycle (Step 4 and Step 7). When the FSM enters Change\_Allocation state, the five bits port\_busy (generated in Step 11) and the port\_mask signals are used to determine the new owner of this bank (Step 15 to 19). The fundamental idea of this algorithm is that choosing the candidate in order and skip the idle input ports to accelerate this process. If the position of the left-most `1' in the selector signal (generated at Step 13) matches one of the input ports listed in Table \ref{portencode}, the shared buffer is granted to this port. Thus, the choosing order of this algorithm is: East $\to$ West $\to$ South $\to$ North $\to$ Local $\to$ East. One example of how this algorithm functions is illustrated in Fig. \ref{Algorithm}. For a real-world application, we can also change the allocation algorithm to adapt the characteristic of traffic pattern.
+\begin{algorithm}
+\caption{Shared buffer allocation}\label{alg:bufferalloc}
+\begin{algorithmic}[1]
+\STATE \textbf{Initialized:}
+\STATE \ \ \ \ \textbf{if}(bank\_id==5)
+\STATE \ \ \ \ \ sbuf\_grant = 5'b00001;
+\STATE \ \ \ \ \ port\_mask = 5'b11111;
+\STATE \ \ \ \ \textbf{else}
+\STATE \ \ \ \ \ sbuf\_grant = East $>>$ bank\_id;
+\STATE \ \ \ \ \ port\_mask = 5'b11111 $>>$ (bank\_id+1);
+\STATE \ \ \ \ \textbf{endif}
+\STATE \textbf{Change\_Allocation:}
+\STATE \ \ \ \ \textbf{for}(p=1;p$<=$5;p=p+1)
+\STATE \ \ \ \ \ port\_busy[p] = $|$ private\_vc\_allocated[p];
+\STATE \ \ \ \ \textbf{endfor}
+\STATE \ \ \ \ selector = port\_mask \& port\_busy;
+\STATE \ \ \ \ \textbf{case}(selector)
+\STATE \ \ \ \ \ \ \ \ 5'b1xxxx: sbuf\_grant = East; port\_mask=5'b01111;
+\STATE \ \ \ \ \ \ \ \ 5'b01xxx: sbuf\_grant = West; port\_mask=5'b00111;
+\STATE \ \ \ \ \ \ \ \ 5'b001xx: sbuf\_grant = South; port\_mask=5'b00011;
+\STATE \ \ \ \ \ \ \ \ 5'b0001x: sbuf\_grant = North; port\_mask=5'b00001;
+\STATE \ \ \ \ \ \ \ \ 5'b00001: sbuf\_grant = Local; port\_mask=5'b11111;
+\STATE \ \ \ \ \ \ \ \ default: port\_mask=5'b11111;
+\STATE \ \ \ \ \textbf{endcase}
+\end{algorithmic}
+\end{algorithm}
 \begin{figure}
-\centering\includegraphics[scale=0.5]{figures/allocator.pdf}
-\caption{Allocator Utilization}\label{allocator}
+\centering\includegraphics[scale=0.5]{figures/Algorithm.pdf}
+\caption{A step-by-step example of buffer allocation algorithm}\label{Algorithm}
 \end{figure}
 
+\subsection{VC and SW Allocator}\label{allocmux}
+The goal of inter-port VC sharing is to alleviate the performance degradation caused by VC blocking. Because the allocation results changes with traffic load, our architecture is more suitable to address the blocking caused by unbalanced VC and buffer requirement of router ports. After implement the VC sharing in AVCS-NoC, the VCs each input port can use includes the private VCs of this port and the VCs shared among all these ports. The number of VCs each input port can use varies with traffic condition, since an input port with heavy traffic load is likely to own more buffer banks. Denote the number of input ports and the maximal VCs each input port can use as $P$ and $V_{max}$. The VC allocator matches $P\times V_{max}$ requests from $P$ input ports with $P\times V_{max}$ output VCs. Similarly, the switch allocator matches the $P\times V_{max}$ requests from $P$ input ports to $P$ output ports. To support the worst-case VC and switch allocation, one solution is that by adapting a $PV_{max}\times PV_{max}$ VC allocator and a $PV_{max}\times P$ switch allocator. However, this will make the entire allocator complex and introduce significant hardware overhead.
+\begin{comment}
+采用端口间的VC共享方案的根本目的是为了尽可以避免VC阻塞造成的性能下降。由于实现了VC共享，在我们提出的路由器结构中，每个端口所能使用的虚通道有两个部分组成：一部分是每个端口的私有虚通道；另一部分是在各个端口间共享的虚通道。只有当某个存储体被分配给某个端口后，相应的vc 才能够被该端口使用。因此，每个端口所能使用的虚通道的数量是动态变化的。记端口数量为P，每个端口所能使用的最大的虚通道数量为$V_{max}$。 为了支持对最差情况下的虚通道分配和交换机分配，一种可选的方法是为每个路由器配置一个$PV_{max}\times PV_{max}$的虚通道分配和一个$PV_{max}\times P$ 的交换机分配器。但是，这样会使得整个系统变得非常复杂而且还会限制系统所能达到的时钟频率。因此在本文中我们采用另一种方法。
+\end{comment}
+
+In this paper, we employ another approach. Our approach relies on two properties of AVCS-NoC: The number of shared VCs in AVCS-NoC is equal to the number of private VCs of each input port, and the number of VCs each input port can use lies between $1/2V_{max}$ and $V_{max}$. We assign an unique ID to each shared VC, and let these shared VCs compete the allocator ports with private VCs. Thus, our approach use a $1/2PV_{max}\times 1/2PV_{max}$ VC allocator and a $1/2PV_{max}\times P$ switch allocator to perform the VC and switch allocation. The reason we employ a smaller VC and switch allocator with port sharing rather than a larger allocator lies in the fact that the port utilization of VC and switch allocator is very low, especially for the VC allocation, as indicated in Fig. \ref{utilization}. Because only when a head flit can issue an allocation request and this port will keeps on idle until the tail flit departure. The idle request port in our approach can be reused to improve the utilization: When the shared VC has no request, this port can be reused by the private VC and vice versa. This improvement makes it possible to utilize a smaller allocator to perform the VC and switch arbitration.
+\begin{comment}
+我将为5个共享存储体上的所有vc进行统一的编号，使得每个共享vc都有不同的ID，而且共享vc的总数恰好等于每个端口的私有vc的数量。我们并不为这些共享vc预留专用的分配器端口，而是让这些虚通道复用私有vc的分配器端口，我们称那些共享缓存虚通道为“影子vc”。我们的方案中影子vc与端口的私有vc共享同一个sw端口和va端口，这样既实现支持了大规模vc又降低了功耗和成本。我们将在第\ref{experiemnts}节通过实验来验证这一点。对于之前的共享VC方案，假设原来的动态VC方案中每个端口有x个VC，那么我们的方案每个端口设置5x/6个私有VC，另外还有5x/6个VC 为各个端口间共享的。由于实现了端口间的vc共享，每个路由器端口所能使用的vc数量在5x/6和10x/6之间动态变化，远远大于之前的设计方案. 每个共享输出虚通道都有对应的elig标志位，只有当下游节点相应的memory bank分配给该端口而且相应的vc没有被分配时，该标志位为1，VCA据此来屏蔽不能使用的输出VC。这在一定程度上也缓解了因为vc 分配失败所带来的开销。
+\end{comment}
+\begin{comment}
+需要说明的是，这种端口复用的方法并不会影响网络的性能。对于虚通道分配器来说，一个已经被分配的输入VC在尾切片没有到达之前是不会再发出任何请求的，在此期间该分配器端口可以被影子vc所使用。对于sw分配器来说，如果相应vc的报文因为某些原因被阻塞，那么这个分配器端口也会空闲，此时如果共享vc被分配在这个端口，那么就可以利用这些空闲的分配器端口进行数据传输。由于每个时钟周期每个端口最多输出１个切片，因此只要能够保证每个时钟周期有一个输入虚通道被授权，就可以保证吞吐率,多余的请求在当前周期内是不会被grant的。实现了端口复用之后，每个分配器端口的利用率都大幅度提高，而且报文长度越长，效果就越明显。
+\end{comment}
+
+Specifically, when a shared buffer is designated to an input port, the eligible flags of all the corresponding shared VCs are asserted to allow the granting of a request. To enable the sharing of allocator port, we add a $2:1$ selector to each request port to choose a request from either private VC or shared VC. This selector chooses these two input VCs in round-robin order to prevent livelock. Then a $1/2PV_{max}\times 1/2PV_{max}$ separable input first allocator is used to perform the subsequent arbitration. The separable input first allocator employs $1/2V_{max}$ $1/2V_{max}:1$ arbiters at each input port to grant at most 1 output VC to this request port, and each output port uses $1/2V_{max}$ $1/2PV_{max}:1$ arbiters to select one input request for each output VC. In order to make the allocation of shared buffer sensitive to the dynamical changing of traffic, we assign lower priority to the shared output VC. A shared output VC is allocated only when all the private VCs have been occupied. In contrast, to meet the same arbitration demand, the separable input first allocator used in the typical router needs $V_{max}$ $V_{max}:1$ arbiters to guarantee each input VC can only request at most 1 output VC, and each output port employs $V_{max}$ $PV_{max}:1$ arbiters to grant each output VC to a unique input VC.
+\begin{comment}
+对于同样的最大虚通道数量$V_{max}$，虚通道分配器的作用是为$P\times V_{max}$个输入请求分配$P\times V_{max}$ 个输出虚通道。如果不采用影子vc技术，需要在每个输入端口采用$V_{max}$个$V_{max}:1$仲裁器用来保证每个输入vc 只能请求1个输出vc，在每个输出端口采用$V_{max}$个$PV_{max}:1$ 仲裁器用来保证每个输出vc只能分配给$PV_{max}$个输入vc中的1个。对于我们采用了影子vc的方案，每个输入端口只需要$5V_{max}/6$ 个$5V_{max}/6:1$ 仲裁器和$2:1$的优先级仲裁器，每个输出端口需要$5V_{max}/6$个$5PV_{max}/6:1$的仲裁器。因此，我们的方案只需要规模为$5/6V_{max}\times 5/6V_{max}$ 的分配器，采用较小的分配器的好处是降低硬件复杂度并易于降低分配器的功耗和面积。为了使得共享vc尽快适应每个端口流量的变化情况并简化共享VC的分配逻辑，我们在Vc分配时为共享vc分配较低的优先级，只有当私有vc全部被占用时才会使用影子vc。
+\end{comment}
 \begin{figure}
-\centering\includegraphics[scale=0.5]{figures/latency.pdf}
-\caption{Average Latency}\label{latency}
+\centering\includegraphics[scale=0.25]{figures/vcalloc.pdf}
+\caption{The Implementation of VC allocator}\label{vcallocator}
 \end{figure}
 
-另外，我们还比较了我们基于影子vc的虚通道和交换机分配模块的芯片面积，功耗和支持的最高频率。假设基准路由器每个端口的vc数量为N，那么基准路由器中vc分配模块和sw分配模块的规模均为$N\times N$，相应的，我们的方案中两个分配器的规模均为$5/6N\times 5/6N$。假设每个路由器为５个端口，我们采用synopsys design compiler工具对ＲＴＬ代码进行逻辑综合，采用开源的45nm工艺库PDK。为了两种方案所能支持的最高频率，在综合过程中我们以１０MHz为步长逐浪提高频率直至违反时序约束。所得的实验结果如下表所示：
+Similarly, for the switch allocator, if one of the VC is blocked due to some reasons, the corresponding allocator port can be used to perform switch arbitration for the shared VC. As shown in Fig. \ref{swallocator}, we first use a $2:1$ arbiter to select on request from either shadow VC or private VC at the first stage. We select these two VCs in round-robin order to avoid live lock. The second stage utilizes a $1/2V_{max}:1$ arbiter at each input port to select one winner from all the request. Then, a third stage with a $P:1$ arbiter at each output port is applied to select one request for each output. While performing the switch allocation, the buffer availability of the downstream routers is considered. In contrast, to meet the same arbitration demand, the separable input first allocator used in the typical router needs $V_{max}$ $V_{max}:1$ arbiters to guarantee at most 1 input VC be granted, and each output port employs a $P:1$ arbiters to grant to a unique input VC.
+\begin{comment}
+我们的交换机分配器为$P\times V_{max}$个请求分配$P$个输出端口资源，如图\ref{swallocator}。与虚通道仲裁器类似，由于影子vc和私有vc共享同一个sw/va请求端口，因此我们需要在该端口上增加一个$2:1$ 的优先级分配器来选择一个请求输入到分配器中.为了让共享虚通道尽快排空队列以适应流量的变化，我们给影子vc 赋预较高的优先级。接下来我们为每个输入端口设置1个$5V_{max}/6:1$的仲裁器用于从该端口中选择一个vc作为下一时钟的备选输出vc；并为每个输出端口设置1个$P:1$ 的仲裁器用于选择一个输入端口。在进行交换机分配时需要考虑下游路由器的可用缓存大小，因此信约值会做为交换机分配的依据。我们的方案在第二阶段与经典的路由器结构相同，但是在输入阶段采用的仲裁器规模更小。对于仲裁器的面积和功耗我们将在\ref{experiemnts} 节进行详细的比较。
+\end{comment}
+\begin{figure}
+\centering\includegraphics[scale=0.3]{figures/swalloc.pdf}
+\caption{The Implementation of SW allocator}\label{swallocator}
+\end{figure}
+
+We will demonstrate the hardware saving of our proposal in subsection \ref{experiemnts}. We also need to emphasize that although this sharing scheme might impose additional latency to the packet failed the arbitration at the first stage, the average network latency is greatly improved due to the inter-port VC sharing.
+
+\section{Experimental results}\label{experiemnts}
+To compare the performance and hardware overhead of our approach with the existing proposals, we implement the AVCS-NoC micro-architecture, the typical router architecture and the linked-list based dynamical buffer architecture. Under the same configuration, shown in Table \ref{config}, we report the comparison results on hardware cost, performance, power and chip area in the following three subsections.
+\begin{comment}
+为了评价our approach的优劣，我们基于Verilog HDL设计并实现了我们的路由器方案Cononical以及经典路由器结构和基于链表组织的动态缓存管理方案LL。 baseline 路由器同样采用基于链表的动态缓存管理方案，基于虫孔交换的标准５段流水线的片上网络，采用基于信约的流量控制，路由算法采用维序路由，拓扑结构为Mesh结构，因此每个路由器有５个端口。每个缓存器的容量为x个切片，每个切片为64bit 宽。每个端口共有10个私有vc，共享缓存共有１０个影子vc。在接下来的三个小节中，我们分别比较和评估我们的方案与Cononical和LL两种基准路由器在需要的硬件控制逻辑、性能、功耗、面积等方面的优势。
+\end{comment}
+\begin{table}[htbp]
+\centering
+\caption{\label{arcpara}Architecture parameters used in the experiments}\label{config}
+\begin{tabular}{|c|c||c|c|}
+\hline
+network topology    & $4\times 4$ mesh  &   routing algorithm & DOR\\
+\hline
+channel width   & 128 bits & buffer size &   24 flits\\
+\hline
+flit width	& 128 bits & packet length & 8 flits\\
+\hline
+sampling period &   $1\times 10^5$ cycles    &   warmup period   &   $3\times 10^5$ cycles\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Control Overhead Comparison}\label{controllogic}
+Both the UBS \cite{NPKV06}\cite{5770788} and linked-list based \cite{4555894}\cite{Neishaburi:2009:RAN:1531542.1531658} buffer management scheme require large amount of control logic and registers to keep track of the buffer usage. For the inter-port buffer sharing scheme \cite{Neishaburi:2009:RAN:1531542.1531658}, the hardware overhead is even more since the Next Pointer and Free Slot Pointer for each input port, the Header Pointer and Tail Pointer for each VC must be able to index all the buffer slot within a router. Supposing the typical router \cite{NPKV06}\cite{5770788}\cite{4555894}\cite{Neishaburi:2009:RAN:1531542.1531658} has $B$ buffer slots and $V$ VCs at each input port, and the packet length is $L$. Under the same condition, our approach has $5/6V$ private VCs and $5/6B$ buffer slots at each input port, and each shared buffer bank has $1/6B$ buffer slots and $1/6V$ shared VCs. For each input port of the UBS architecture, the VC Availability Tracker and Slots Availability Tracker require $V+\lceil log_2 V\rceil$ and $B+\lceil log_2B\rceil$ registers, respectively; The VC Control Table needs $VL\lceil log_2B\rceil$ registers; Both the Arriving and Departing Flit Pointers require $2V\lceil log_2 L\rceil$ registers. For each input port of the linked-list based architecture \cite{4555894}, the Free Slots Table requires $B$ registers to track the unused slots and $\lceil \log_2 B\rceil$ registers to point to the first available slot. The Next Pointers Table requires $B\times \lceil log_2 B\rceil$ registers to maintain the flits order of all the VCs. Both the Head Pointers Table and Tail Pointers Table need $V\times \lceil log_2 B\rceil$ registers. Similarly, the hardware overhead of our proposal can be derived, as shown in Table \ref{control}.
+\begin{comment}
+无论是基于UBC\cite{NPKV06}\cite{5770788}的动态缓存管理结构还是基于链表\cite{4555894}\cite{Neishaburi:2009:RAN:1531542.1531658} 的动态缓存管理，都需要除了缓存器以外的大量的控制存储逻辑来对缓存区进行动态的管理。特别是MH提出的端口间缓存共享的方案\cite{5770788}\cite{Neishaburi:2009:RAN:1531542.1531658} 所需要的控制逻辑更多，因为它要求每个端口的next buffer slot ,header ptr 和tail ptr 应该都是可以寻址到该路由器中任何一个buffer slot的。而在我们的路由器结构中，路由器的缓存被分成了苦干个独立寻址的小块。在同样的缓存容量前提下，我们的路由器结构由于每个memory bank所寻址的地址空间变小，因而所需要的存储控制逻辑（即用来存储next buffer slot ,header ptr 和tail ptr 的寄存器的数量）也相应的减少。
+\end{comment}
+\begin{comment}
+假设每个端口有容量为B的缓存资源，对于之前的方案\cite{NPKV06}\cite{5770788}\cite{4555894}\cite{Neishaburi:2009:RAN:1531542.1531658} 每个端口有$V_{max}$个虚通道，报文长度为$L$；那么在同等条件下，我们的方案中每个端口有$5/6V_{max}$个私有VC 和$5/6B$的私有存储空间，每个共享存储块中含有$1/6B$的存储空间和$1/6V_{max}$个VC. 对于UBC 方案，每个端口的VC Tracker 需要$V_{max}$ 个寄存器，Free Slot Tracker 需要$B$ 个寄存器，VC Control Table 需要$V_{max}Llog_2B$ 个寄存器；对于一个5 个端口的路由器所需要的总的控制开销为$V_{max}+B+V_{max}Llog_2B$。 对于Lai 提出的基于链表的端口内缓存共享方案\cite{4555894}，每个端口的free buffer tracker的开销为$B\times log_2 B$，header pointer的开销是$V_{max}\times log_2 B$，tail pointer 的开销是$V_{max}\times log_2 B$，下一跳指针的开销$B\times log_2 B$；5个端口总的控制开销为$10\times(B+V_{max})\times log_2B$。采用同样的方法可以推导出MH提出的两种端口间缓存共享方案\cite{5770788}\cite{Neishaburi:2009:RAN:1531542.1531658} 以及我们的方案的控制存储开销，如表\ref{control}所示。
+\end{comment}
+\begin{table}
+\centering\begin{tabular}{c|c}
+\hline
+\hline
+Structure & Control Register\\
+\hline
+UBS\cite{NPKV06}  &   $5((V+B)+(1+LV)\lceil log_2B\rceil+\lceil log_2V\rceil+2V\lceil log_2L\rceil)$\\
+\hline
+Linked List\cite{4555894} & $5(B+(1+B+2V) \lceil log_2B\rceil)$\\
+\hline
+our approach    & $5(B+(1+\frac{5}{6}B+\frac{10}{6}V)\lceil log_2\frac{5}{6}B\rceil +(1+\frac{B}{6}+\frac{2}{6}V)\lceil log_2\frac{B}{6}\rceil)$\\
+\hline
+\end{tabular}
+\caption{Hardware Overhead Comparison}\label{control}
+\end{table}
+
+To make concrete comparison, for the same packet length $L=8$ flits, we plot the hardware overhead of each scheme listed above under different buffer capacity and VC number in Fig. \ref{bufcmp}. As shown in this figure, our approach uses the lest control logic among all these proposals. because our approach divides the buffer resource into several banks, and each bank manages their own buffer resource independent. The total hardware overhead is greatly reduced since the addressing space of each buffer bank decreases. When the flit width, VC number, buffer size, packet length are 128bits, 12, 24 flits, 8 flits, respectively, the total hardware overhead of our approach is only 5.37\%, whereas the hardware overhead of linked-list and UBS approach are 7.16\% and 16.24\%, respectively. We also need to emphasize that although our proposal introduces additional hardware overhead, the utilization improvement makes it possible to halve the buffer slots without degrading the performance, as presented in the following subsection. Thus, our proposal is cost-efficient.
+\begin{comment}
+为了比较这几种方案所需要的缓存资源，我们假设三种方案使用同样的缓存容量的情况下，对不同的参数值，我们将所需要的控制资源数量画在图\ref{comparions} 中。从图中可以看出，在所有三类参考设计中，在我们的方案是消耗硬件最少的一种。在VC数量为x,缓存容量为X,切片宽度为X时，我们的方案引入的控制存储开销仅为X。我们还需要说明的是，虽然采用共享存储的方式增加了控制逻辑的复杂度，但是提高了性能和缓存利用率。以VichaR为例，实现同样的性能只需要传统路由器50\%的存储资源。端口间的缓存共享可以提高buffer的利用率，使得采用较少的buffer实现较高的性能成为可能。但是，MH提出的方案完全的端口间缓存共享\cite{5770788}\cite{Neishaburi:2009:RAN:1531542.1531658} 需要非常复杂的逻辑支持以及大量的硬件支持，而这些复杂的硬件又会进一步增加系统的功耗。我们的方案实际上是在不共享和完全共享之间的一个折衷，通过仅共享一部分缓存空间，我们使用对共享缓存的控制存储开销大大降低。
+\end{comment}
+\begin{figure}
+  \centering
+  \subfloat[30 buffer slots per port]{\includegraphics[scale=0.23]{figures/bufcmp1.eps}\label{bufcmp1}}\hspace{10pt}
+  \subfloat[12 VCs per port]{\includegraphics[scale=0.23]{figures/bufcmp2.eps}\label{bufcmp2}}
+  \caption{Hardware Overhead Comparison}\label{bufcmp}
+\end{figure}
+
+\subsection{Performance Comparison}
+\subsubsection{Synthesis Traffic}
+For the typical router architecture, we suppose each input port has 8 VCs and 24 buffer slots, denoted as Gen(8,24). The dynamical buffer management router architecture is deployed with 12 VCs per input port. To make a fair comparison, we let each input port of our approach have 10 VCs and the shared buffer have 10 VCs in total. Throughout this paper, we set the threshold $K=10$. Uniform and hotspots traffic pattern are taken as examples to demonstrate the performance of these three micro-architecture.
+\begin{comment}
+为了比较我们的方案与现有经典路由器结构和基于链表的动态缓存管理方案的性能优劣，我们假设网络拓扑结构为4x4的mesh，报文长度为8个切片。对于典型的基于链表的路由器结构，我们假设每个端口有１２个虚通道，24个切片的缓存容量。对于我们的结构，为了保证与经典结构有相同的配置，我们假设每个端口有１０个私有虚通道和20 个切片的缓存容量，共享缓存容量为20个切片，虚通道共有１０个。我们假设packet source的缓冲区无限大，暂时无法进入网络的报文将被缓存中源端。我们以均匀流量以及热点流量(热点为０号结点)为例来比较我们的方案与经典路由器和基于链表的路由器结构。设置预热周期为$10^4$ 拍，测量周期为$10^5$ 拍，所得的实验结果如图\ref{lat} 所示.
+\end{comment}
+\begin{figure}
+  \centering
+  \subfloat[hotspot traffic pattern]{\includegraphics[scale=0.23]{figures/hotspotlat.eps}\label{hotspotlat}}\hspace{10pt}
+  \subfloat[uniform traffic pattern]{\includegraphics[scale=0.23]{figures/randomlat.eps}\label{randomlat}}
+  \caption{Latency Comparison}\label{lat}
+\end{figure}
+
+As shown in Fig. \ref{lat}, we find that our approach improves the performance under hotspot traffic significantly, take the injection rate 0.00656 flits/node/cycle as an example, our router reduce the average latency over the dynamical scheme by 12.16\%. For the uniform traffic, our approach achieves the similar performance as the dynamic buffer structure and improves the throughput significantly as compared with the Gen(8,24). The slightly performance degradation when compared with the dynamical scheme lies in the fact that the congestion status of each input port under uniform traffic pattern is similar, which makes the inter-port buffer sharing approach less promising. In addition, we also compared the performance of our router with the other routers under transpose and xxx traffic pattern, the average latency reduction near the saturation point improves about x\% and x\% over typical router, and x\% and y\% over the dynamical scheme. For the same configuration, we also compared the utilization of VC allocator. As shown in Fig. \ref{util}, our approach indeed improved the allocator utilization significantly. In addition, we also compared the performance of our router with the typical router architecture with twice many buffer slots, denoted as Gen(8,48). As shown in Fig.\ref{randomlat}, our router achieves better performance than that of typical router with twice buffer resource.
+\begin{comment}
+通过实验，我们发现，我们的方案在热点流量情况下性能改进非常很明显，以注入速率0.005为例，我们的路由器性能提升15\%. 而热点流量恰是Cache 一致性能及MC访问的重要应用场景。从图中还可以看出，我们的方法对于均匀流量来说造成了一定的性能下降，原因是对于均匀流量来说，每个路由器端口的拥塞程序通常很接近，因而端口间缓存共享带来的性能提升非常有限。而在热点流量情况下，端口间的流量分布是严格不均匀的，因而我们的方案可能会得到更大的收益。此外，我们还比较了两种路由器结构在transpose流量模式下在饱和点附近的平均延迟情况，结果显示我们的方案在K=x时性能提升x\%.
+\end{comment}
+\begin{comment}
+对于同样的配置参数，我们还比较了我们的方案与两种基准路由器方案的VC分配器的利用率。对于一个NxN的二维Mesh拓扑结构的网络来说，如果每个路由器有P个端口、每个端口V 个虚通道，那么这个网络中每个路由器的虚通道分配器端口的平均利用率可以采用下面的公式来表示：
+$$\rho=\frac{1}{NPV}\times \sum_1^N\sum_1^P\sum_1^V\frac{\#idlecycles}{\#totalcycles}.$$ 对于同样的配置参数，我们得到流量模式为均匀流量以及热点流量时分配器端口的利用率，如图\ref{util}所示。通过实验结果发现，我们的方案确实使得虚通道分配器的利用率则得到了显著的提高。
+\end{comment}
+\begin{figure}
+  \centering
+  \subfloat[hotspot traffic pattern]{\includegraphics[scale=0.23]{figures/hotspotutil.eps}\label{hotspotutil}}\hspace{10pt}
+  \subfloat[uniform traffic pattern]{\includegraphics[scale=0.23]{figures/randomutil.eps}\label{randomutil}}
+  \caption{VC Allocator Utilization Comparison}\label{util}
+\end{figure}
+
+\subsubsection{Realistic Traffic}
+For the realistic application, the workload at each input port is usually different and vary with time, which makes our approach achieve better performance than the typical router architecture and dynamical buffer scheme. We take three real-world applications (Multi-Window Display (MWD) \cite{1374853}, Video Object Plan Decoder (VOPD) \cite{Tol2001} and MPEG4 decoder \cite{Tol2001}) as examples to verify our deduction. These applications are mapped to $4\times 3$, $4\times 4$ and $4\times 3$ mesh NoC, as shown in Fig. \ref{vopd}. The communication rate is labelled on the channel connecting two routers. For the given configuration listed in Table \ref{configure}, we run the simulation under three router architectures. We found that, for the typical router architecture, the average latency of VOPD application is one-magnitude-order larger than that of our approach. For the given three applications, our approach improves the linked-list based scheme by 9\%, x\% and x\%, respectively. In addition, we also find that the average latency of VOPD application on typical router with twice larger buffer space is as similar as that of our approach. Thus, For the 64bit flit width, the total hardware saving of our approach is about x\% although the control logic introduces x\% hardware overhead.
+\begin{comment}
+在实际的应用中，端口之间的流量分布通常是不均匀的，因此我们的方案较之前的方案会有较大的性能提升。我们以Video Object Plan Decoder (VOPD)应用\cite{Tol2001}来验证这一点。该应用共有16个子任务组成，将其采用NMAP映射算法\cite{1269002}映射到$4\times 4$的Mesh网络后如图\ref{vopd}所示，每个链路上的数字表示两个任务之间的通信速率（in flits/cycle）。我们分别采用经典路由器结构、基于链表的路由器结构和我们的路由器结构来进行实验，对于同样的路由器缓存容量和虚通道数量（120切片，30 vc in total），我们发现，经典路由器结构中，延迟比另两种路由器结构大1个数量级，而我们的路由器结构较基于链表的路由器结构性能改进9\%。此外，我们还发现当经典路由器结构采用2倍于AVCS路由器的缓存容量时二者的性能相当。这也进一步说明，我们的方案通过实现动态缓存管理和端口间缓存和虚通道共享在很大程度上降低了硬件成本。我们知道，在切片位宽为128bit 时，我们的动态缓存管理结构引入的控制开销为x\%bit，而在采用了动态缓存管理后可以节省的缓存容量为50\%。因此，我们总的存储成本大大下降。
+\end{comment}
+\begin{figure*}
+  \centering
+  \subfloat[Video Object Plan Decoder]{\includegraphics[scale=0.35]{figures/vopd.pdf}\label{vopd}}\hspace{10pt}
+  \subfloat[MPEG4 Decoder]{\includegraphics[scale=0.35]{figures/mpeg4.pdf}\label{mpeg4}}\hspace{10pt}
+  \subfloat[Multi-Window Display]{\includegraphics[scale=0.35]{figures/mwd.pdf}\label{mwd}}
+  \caption{Task mapping of three applications on mesh topology and corresponding injection rate (flits/cycle)}
+\end{figure*}
+
+\begin{table}
+  \centering
+  \begin{tabular}{llll}
+    \hline\hline
+    Configuration & MPEG4 decoder & VOPD & MWD\\
+    \hline
+    Network topology & $4\times 3$ mesh & $4\times 4$ mesh & $4\times 3$ mesh\\
+    \hline
+    Routing algorithm & DOR & DOR & DOR\\
+    \hline
+    VCs number & 2 & 6 & 2\\
+    \hline
+    Mapping policy & x & NMAP \cite{1269002} & x\\
+    \hline
+    Buffer size & 20 flits & 20 flits & 20 flits\\
+    \hline
+    Packet length & 8 flits & 8 flits & 8 flits\\
+    \hline
+    Flit width & 64 bits & 64 bits & 64 bits\\
+    \hline
+  \end{tabular}
+  \caption{Simulation configuration}\label{configure}
+\end{table}
+
+
+\subsection{Power and Area Comparison}
+The detailed RTL implementation of AVCS-NoC and the other two router micro-architectures are synthesized with Synopsys Design Compiler under FreePDK 45nm Standard Cell Library \cite{nangate}. We configure the medium effort optimization option for the synthesis tool and set the working voltage and frequency to 1.1V and 200MHz. For the dynamically managed buffer micro-architecture, the power consumption with the assumed switching activity factor 10\% is 83.927mW , chip area is 622744.1875$\mu^2 m$. In contrast, our approach consumes 97.456mW and 730190.5625 $\mu^2 m$ under the same conditions, which saves x\% chip area and introduce x\% power overhead compared with the dynamical scheme. We also compared the power and area overhead of our approach with the typical router micro-architecture with twice more buffer space since they achieve the similar performance under the synthesis and realistic traffic pattern. The power consumption and chip area of the typical router is 112.291mW and 662987.9537$\mu^2m$, which occupies x\% more chip area and consumes y\% power than our approach.
+\begin{comment}
+为了展示我们提出的体系结构的性能优势以及成本等特点，我们采用Verilog 实现了一个时钟精确的noc 路由器模型，该模型通过Synopsys 工具进行综合，采用的工艺库是open-source process design kit FreePDK 45nm Standard Cell Library 工艺库\cite{nangate}，工作电压设置为1.1V。 在主频200MHz 时：对于动态分配的片上网络路由器结构，动态功耗为99.4796mW，芯片面积为827262.788363，而我们的方案功耗为101.8994mW，面积823642.608870. 经过比较发现我们的方案功耗提高2\%，但是占用的芯片面积下降0.4\%.
+\end{comment}
+
+Finally, we compared the chip area and power consumption of our VC and switch allocator with the baseline routers. Supposing each router has $P$ input and output ports, each port has $V$ VCs, then a $PV\times PV$ VC allocator and a $PV\times P$ switch allocator are required for the typical router micro-architecture, while our approach use a $5/6PV\times 5/6PV$ VC allocator and a $5/6PV\times P$ switch allocator. We let $P=5$ and change V from 6 to 24 with step 6, the power and chip area of these two schemes are listed in Table \ref{alloccost}. As shown in this table, our approach saves more chip area than the typical allocator structure. In addition, our approach tends to save more power consumption than the baseline allocator structure when the more VCs are supported.
+\begin{comment}
+另外，我们还比较了我们基于影子vc的虚通道和交换机分配模块的芯片面积和功耗。假设基准路由器有５个端口，每个端口的vc数量为$V_{max}$，那么基准路由器中vc分配模块和sw分配模块的规模均为$V_{max}\times V_{max}$，相应的，我们的方案中两个分配器的规模均为$5/6V_{max}\times 5/6V_{max}$。设置工作电压1.1V和工作频率200MHz，我们比较了两种方案的面积和功耗，如表\ref{alloccost}所示。从表中可以看出，我们的方案在面积方面始终都优于之前的方案。随着虚通道数量的增加，我们的方案功耗效率也逐渐超过基准路由器结构。
+\end{comment}
 \begin{table*}
 \centering\begin{tabular}{|c|c|c|c|c|c|c|c|}
 \hline
-\multirow{2}{*}{$\#$VC} & \multicolumn{3}{|c|}{Baseline Router} & \multicolumn{3}{|c|}{Our Router}\\
+\multirow{2}{*}{$\#$VC} & \multicolumn{3}{|c|}{Area($\mu m^2$)} & \multicolumn{3}{|c|}{Power(mW)}\\
 \cline{2-7}
-& Power (mW) & Area($\mu m^2$) & Frequency (MHz) & Power (mW) & Area($\mu m^2$) & Frequency (MHz)\\
+& Baseline & AVCS & AVCS vs. Baseline & Baseline & AVCS & AVCS vs. Baseline\\
 \hline
-5 & 0 & 0 & 0 & 0 & 0 & 0\\
+6 & 62013.8828 & 58659.8906 & $\downarrow$ 5.6\% & 5.846 & 6.292 & $\uparrow$ 7\%\\
 \hline
-10 & 0 & 0 & 0 & 0 & 0 & 0\\
+10 & 221112.5312 & 206178.4062 & $\downarrow$ 6.0\% & 14.916 & 15.276 & $\uparrow$ 2\%\\
 \hline
-15 & 0 & 0 & 0 & 0 & 0 & 0\\
+15 & 492946.6562 & 426018.5625 & $\downarrow$ 13.57\% & 26.962 & 24.870 & $\downarrow$ 7.75\%\\
+\hline
+20 & 882065.3750 & 822519.5000 & $\downarrow$ 6.75\% & 38.999 & 38.732 & $\downarrow$ 0.68\%\\
 \hline
 \end{tabular}
-\caption{Comparison with Baseline Router}
+\caption{Chip area and power consumption comparison with baseline allocator}\label{alloccost}
 \end{table*}
-从上表中可以看出，我们的方案在面积和功耗方面都优于之前的方案。另外，由于采用了较少的分配器，两个分配器所能支持的最高频率较基准路由器也有所提高。
 
-\subsection{缓存分配模块的实现}
-我们的共享虚通道技术为每个端口预留少量的VC以减少VC仲裁和分配的压力，为了保证最差情况下的延迟性能，我们需要一种技术来确定每个虚通道所需要的最少的buffer slot数量。这就是我们之前基于RTC的论文所要解决的问题，由于在动态VC共享方案中每个VC只需要保留1个buffer slot便可以保证无死锁。我们的方案采用RTC的方法来确定每个VC所需要分配的最少缓存区。对于热点流量来说，特别是热点处于mesh网络的四个角上或者四条边上的时候，热点路由器和一些其它的路由器总有某些端口的缓存是没有被利用的。不光这些缓存区是没有被利用的，就连这些端口所对应的VC也是无法被有效使用的。因此我们可以考虑共享一部分缓存区和VC，之前MH的方案中VC是每个端口所独有的，没有被共享；为了保证性能，需要为每个端口预留大量的VC才能保证性能。但是这无疑增加了硬件成本降低了资源利用率。共享缓存技术除了增加资源利用率以外，还增加了实现了动态VC分配中间出现的流量隔离技术。
-
-集中的控制器根据每个端口的需要进行动态的分配，重新分配的前提是该共享存储体上的所有vc都空间（由于优先分配私有vc因此这种情况会经常出现）都已经被释放。每个集中的控制器提前若干周期预测每个端口的vc需求然后将vc回收的结果提前告知占用该vc的端口，在收到vc回收请求以后，该端口停止对相应共享vc的再分配，等该vc被排空后该端口向集中控制器告知该共享vc可以进行再分配。集中的控制器是一个有限状态机，该状态机负责对几个共享存储体的分配和调度，每个共享存储体有一个自己的状态机用于协调与各个端口的分配/回收请求。
-
-采用一个有限状态机来控制对bank的分配，该状态机有３个状态。并设计一个公式来做为每个端口的请求度。对于５个bank和5个端口间的分配有２５种方案，最优的方案由５个分配控制有限状态机来实现。
-
-对共享缓存的分配算法如下：每个控制器中有５个计算器用于记录每个端口的相应vc段的分配情况，每个时钟如果该段vc均被分配且自增，当增加到最大值是暂停。当某个vc空闲时这一计算器清零然后重新计数。这个计算器将作为度量拥塞程度的指标。整个allocator是一个基于优先级的分配器，由于在水平方向容易发生拥塞「参考文献」，因此水平方向的两个端口优先级最高，只有当垂直方向更加拥塞时才将相应的共享存储块分配给垂直方向。我们的算法分为两个主要的步骤，第一步根据拥塞程度确定对应的memory bank应该是分配给水平方向还是垂直方向，第二步根据路由器所在的位置和每个方向的拥塞程度来确定分配给哪一个端口。整个分配器由一个有限状态机控制，共有３个状态，当两次分配的结果不同时中间需要有一个排空阶段，否则保持在分配阶段。对下一阶段的预测与这两个状态并行进行。
-
-由于我们的共享存储模块是与路由器流水线并行工作的，不在关键路径上因此对系统的频率不会有影响。
-
-\subsection{与其它几类方案的比较}\label{comp}
-之后MH提出的端口间缓存共享的方案实际上实现了端口间的缓存共享,以减少因流量控制而造成的吞吐率下降和延迟增加。但是因为流量控制而造成的阻塞造成的影响相对虚通道不足造成的影响较小。我们提出的方案同时实现了端口间的缓存共享和虚通道共享，特别是端口间的虚通道共享对改进系统的吞吐率是非常有好处的，因为VC阻塞通常要较多的时钟周期。
-
-另外，与之前MH提出的完全端口间缓存共享不同的是，我们的方案实现了部分端口间缓存共享。之前MH的方案还有下面的问题：由于每个端口的报文或者都存在一个memory bank里，或者与其它端口的报文存储在一起。这样的方法有以下问题：（1）去往不同端口的报文无法并行传输；我们的方案采用多个并行的存储体以减少这一影响。画图展示这一影响。实际上就是一种特殊的HoL。假设端口W到达的切片目的地为E和L，端口N和S都只产生目的端口为E的报文；在RR调度方式下，平均每3个周期服务1个W的E报文；而实际上，W端口中向L端口的切片在高度向E端口的切片时是无法前进的，由于读冲突的存在。
-
-而我们的方案中每个端口所能使用的vc数量是动态变化的，假设虚通道的规模是NxN，那么我们的方案每个端口最多可以支持２Ｎ个虚通道。换句话说，对于同样的最大虚通道数量，我们的方案所用的分配器实际上只有以上两人个方案的一半。当然，这也不会影响性能，因为对于虚通道分配来说，由于每个时钟周期每个端口最多输出１个切片，因此只要能够保证每个时钟周期有一个输入虚通道被授权，就可以保证吞吐率。多余分配的虚通道在当前周期内是不会进行数据传输的。
-
-我们的方法增加的硬件几乎都是简单的组合逻辑电路，因则硬件成本更低。由于我们采用可扩展的VC结构，因则降低了拥塞端口发生拥塞的可能，在一定程度上对避免HoL也有帮助。ViChaR和RAVC的方法都需要对整个路由器进行重新设计，因而成本高。而我们的新方法则主要是在原来的基础上增加了些硬件来提高buffer的利用率。
-
-在硬件开始方面，对每个memory bank设置一1个存储控制模块这样使用的总的控制寄存器的数量要比为每个端口所有的存储体设置一个共用控制器要节省很多的硬件资源。因此，我们的方法从两方面节省了开销，一方面是几个小的控制器；另一方面是我们提出的混合式的存储管理方法的动态存储容量要比同等大小的完全动态的管理方式要小很多。因，最后可以画一张表并给出一张图列不这些比较的结果。
-
-端口间的缓存共享可以提高buffer的利用率，使得采用较少的buffer实现较高的性能成为可能。虽然采用共享存储的方式增加了控制逻辑的复杂度，但是提高了性能和缓存利用率，以VichaR为例，实现同样的性能只需要传统路由器50\%的存储资源。但是，完全的端口间缓存共享（例如mh和mit女人）需要非常复杂的逻辑支持以及大量的硬件支持，而这些复杂的硬件又会进一步增加系统的功耗。mit的研究表明尽管共享提高了吞吐率但是功耗却大大增加这样也就在很大程度上降低了这类方案的可用性。我们的方案实际上是在不共享和完全共享之间的一个折衷，通过仅共享一部分缓存空间，我们使用对共享缓存的控制存储开销大大降低，列一个表给出我们的方案与mh方案需要的指针寄存器的数量。最终还可以列一个表给出我们的功耗与mit的方案比较的结果。而且之前的方案都是只共享了缓存而没有共享vc，当某个端口的vc全部被占用时我们的方案还可以借助其它端口的空闲vc。
-
-MH的方案每个端口有一个较大的缓存器和一套控制逻辑，假设每个端口有B的缓存资源；那么free buffer tracker的开销为$B\times log_2 B$，header pointer 
-的开销是$V_{max}\times log_2 B$，tail pointer的开销是$V_{max}\times log_2 B$，下一跳指针的开销$B\times log_2 B$；5个端口总的控制开销为$10\times(B+V_{max})\times log_2B$；
-而在我们的方案中，由于总的缓存资源中有一部分会被独立分配给每个端口做为静态VC，而且剩下的动态缓存资源又被分为几个小的memory bank,每个memory bank需要的控制资源比较少，我们假设有一半的缓存分配给静态VC，那么我们的方法控制开销为$5\times(B+2V_{max})\times log_2(B/2)$；
-
-另外，我们还可以与mh的方案进行比较，mh的方案为了实现buffer共享，每个端口的next buffer slot ,header ptr和tail ptr应该都是可以寻址到该路由器中任何一个buffer slot的。因此，这种共享方案的控制存储应该是非常耗资源的。对于缓存控制资源的比较：
-我们的方案：
-$5(2*5/6V_mlog5/6B+5/6Blog5/6B)+5/6BlogB/6+5/6BlogB/6$
-
-敕的方法：
-$5(2V_mlogB+BlogB)$
-
-ＭＨ的方案１： 
-$5(2V_mlog5B+Blog5B)$
-
-ＭＨ的方案２：
-
-\begin{figure}
-  \centering
-  % Requires \usepackage{graphicx}
-  \includegraphics[scale=0.45]{figures/dynamic_vs_partial.jpg}\\
-  \caption{完全动态与部分动态的比较}\label{comparions}
-\end{figure}
-
-通过这种方式，我们的方案所使用的控制存储资源要比mh小，同时我们的方案所用的控制存储资源实际上也比lai的方案要少。在做实验进行比较的过程中我们可以考虑两种情况：（1）同样的flit buffer大小的情况下比较性能； （2）同样的存储控制开销的情况下比较性能。（3）同样的性能情况下两人种方案需要的存储器和控制存储资源的多少。
-
-\section{实验与评估}\label{experiemnts}
-为了展示我们提出的体系结构的性能优势以及成本等特点，我们采用Verilog实现了一个时钟精确的noc路由器模型，该模型通过Synopsys工具进行综合，采用的工艺库是open-source process design kit FreePDK 45nm Standard Cell Library工艺[参考文献]。在做实验时可以考虑不同的报文长度以模拟cache一致性协议的需求，例如将报文长度取双峰分布，一个长度为1(对应读请求或者写响应消息)一个长度为16（对应cache行）。在具体的实现过程中，报文长度采用随机长度，每个缓存器的容量为x个切片，每个切片为64bit宽。每个端口共有10个私有vc，共享缓存共有１０个影子vc。我们实现了基于虫孔交换的标准５段流水线的片上网络，采用基于信约的流量控制，路由算法采用维序路由，拓扑结构为Mesh结构，因此每个路由器有５个端口。流量模型为均匀流量，bitrev, bit com, tornado以及热点流量等，热点流量恰是Cache一致性能及MC访问的重要应用场景。我们的方案在热点流量情况下可能很有用，效果会很明显。对于非均匀流量，特别是热点流量情况下，端口间的流量分布是严格不均匀的，因而我们的方案可能会得到更大的收益。
-
-本文，我们采用类似于vicahr的路由器结构来做对比，我们称之为典型路由器结构。但是，我们采用链表来实现。类似的结构已经在dally'2012的代码中实现。类似于lai提出的动态缓存管理方案来与我们的方案进行比较。在lai的方案中，动态的缓存由链表结构来表示。但是，我们没有实现其对应的拥塞警觉模块。
-
-令报文长度为４个切片，热点为０号结点，分配阈值为５，网络拓扑结构为5x5的mesh，两种路由器有相同的缓存大小，均为60个切片。对于典型路由器结构，我们假设每个端口有１２个虚通道，对于我们的结构，我们假设每个端口有１０个私有虚通道，共享虚通道共有１０个。在热点流量模式下，假设每个节点注入报文的过程为bernoulli过程，注入速率从到0.01 $packets/cycles$.令预热周期和测量周期均为$10^5$个时钟周期。以注入速率0.005为例，我们的路由器性能提升15\%.所得的实验结果如下所示：
-
-我们在做实验的时候还可以考虑这样一种情况：对于同样的仲裁器和crossbar类型，对于conventional router、damq路由器和我们提出的路由器结构而言，为了达到同样的性能，我们的方案在需要的缓存资源方面的节省情况。由于实现了端口间的VC共享，我们的方案还可以实现的另一个目标是减少每个VC仲裁器的开销。因为这个仲裁器通常处于路由器流水线中的关键路径上。为了采用较小的分配器来实现大量动态VC的分配，我们的方案要求每个输入端口要有一个VC分发逻辑。该逻辑还要实现VC的重定向以实现流量隔离，避免某个恶意数据流占据所有的缓存空间。缓存资源的使用比较：（1）列表比较资源；（2）实验比较性能，包括吞吐率和延迟；（3）综合结果比较面积和功耗。
-
-在主频200MHz时的实验结果如下：对于动态分配的片上网络路由器结构，对于同样的缓存容量，动态功耗为99.4796mW，芯片面积为827262.788363，而我们的方案功耗为101.8994mW，面积823642.608870.经过比较发现我们的方案功耗提高2\%，但是占用的芯片面积下降0.4\%.
-
-在做实验的时候我们可以统计每个buffer的利用率。我们的方法对于均匀流量来说收益可能是负面的，原因解释与ICCAD'12上的论文相同。另外，counter\_width是一个额外的参数，考察其与系统性能的关系。
-
-最后做实验的时候还可以给出dally提出的传统片上网络的结构。
-
-\section{conclusion and futher works}\label{conc}
-我们提出的是一种运行的VC自适应技术，之前基于RTC的研究属于面向应用的buffer sizing方法，属于设计时的方法。在后继的研究中可以考虑在动态vc分配的基础上实现流量的隔离和服务质量保证。
+\section{conclusion and future works}\label{conc}
+The buffer organization and management scheme is a key factor that determines the router performance. In this paper, we propose a runtime adaptive buffer and VC sharing approach, which dynamically allocates the shared buffer and VCs to the desired input port to better adapt the traffic condition and improve the network performance. Compared with the existing dynamical buffer sharing approach, our method introduces the lest hardware overhead and further improve the performance. Another contribution of this paper is the proposal of shadow VC, which use a smaller allocation to perform the VC and switch allocation. By applying this sharing scheme, the port utilization of each allocation is greatly improve, and the chip area and power overhead reduce significantly. The synthesis results show that, the hardware cost of our method is as same as the linked-list based method, but improve network performance under hotspot traffic pattern by x\%. To achieve the similar performance with the typical static router architecture, our approach saves x\% power and y\% chip area. For the future work, we plan to applying the network calculus theory to this architecture, and realize the fault tolerant and QoS isolation.
+\begin{comment}
+缓存的组织和管理方式是影响基于虚通道的虫孔交换片上网络性能和成本的关键因素。本文中，我们提出一种运行时自适应的缓存和VC分配方案.该方案在网络工作过程中自适应的根据当前流量状态自动的调整缓存和虚通道在各个端口之间的分配，与单纯提高缓存利用率的方法相比，我们的方法可以进一步的提高吞吐率降低平均端到端延迟。本文的另一个贡献是提出了影子VC概念，通过分配器端口复用的方式在不影响怀能的前提下，使得我们可以采用一个较小的VC 和SW分配器来实现对较大规模的分配，进而缩短了路由器中关键路径的长度，进而提高了路由器支持的最高频率。硬件逻辑综合的结果显示，我们的方案与基于链表的方式占用几乎相同的芯片面积和功耗，但是我们的方案在热点流量情况下与经典路由器结构相比改进网络的性能达到x\%，与基于链表的方式相比改进路由器的性能达到x\%。作为将来的工作重点，我们考虑将网络演算理论应用于该体系结构，并考虑在动态vc 分配的基础上实现流量的隔离、服务质量保证和容错。
+\end{comment}
 
 \section*{Acknowledgement}
 The authors thank the reviewers for their suggestions and comments, and all the experiments are carried out at the Integrated Microsystem Lab (IML) of McGill University. This research is supported by High Technology Research and Development Program of China (Grant No. 2012AA012201, 2012AA011902).
 
+\section*{Conflict of Interests}
+The authors declare that there is no conflict of interests regarding the publication of this paper.
+
 \bibliographystyle{unsrt}
 \bibliography{Docear}
+
 \end{document}

@@ -1,0 +1,37 @@
+ 
+****************************************
+Report : area
+Design : router_syn
+Version: B-2008.09
+Date   : Fri Sep  5 12:04:31 2014
+****************************************
+
+Library(s) Used:
+
+    gscl45nm (File: /home/happy/NoCRouter/DynVCRouter/freePDK45/osu_soc/lib/files/gscl45nm.db)
+
+Number of ports:              977
+Number of nets:            290573
+Number of cells:           281284
+Number of references:          23
+
+Combinational area:       585987.682109
+Noncombinational area:    259851.408768
+Net Interconnect area:      undefined  (No wire load specified)
+
+Total cell area:          845839.090877
+Total area:                 undefined
+
+Hierarchical area distribution
+------------------------------
+
+                                  Global cell area              Local cell area
+                                  --------------------  -------------------------------- 
+Hierarchical cell                 Absolute     Percent  Combi-       Noncombi-    Black
+                                  Total        Total    national     national     boxes   Design
+--------------------------------  -----------  -------  -----------  -----------  ------  ---------
+router_syn                        846799.5625    100.0  591904.0000  253895.1719  0.0000  router_syn
+--------------------------------  -----------  -------  -----------  -----------  ------  ---------
+Total                                                   591904.0000  253895.1719  0.0000
+
+1
