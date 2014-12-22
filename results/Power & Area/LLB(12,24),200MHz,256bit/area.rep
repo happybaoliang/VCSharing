@@ -1,0 +1,37 @@
+ 
+****************************************
+Report : area
+Design : router_wrap
+Version: B-2008.09
+Date   : Wed Dec 17 08:15:26 2014
+****************************************
+
+Library(s) Used:
+
+    gscl45nm (File: /root/freePDK45/osu_soc/lib/files/gscl45nm.db)
+
+Number of ports:             2697
+Number of nets:            337281
+Number of cells:           331992
+Number of references:          23
+
+Combinational area:       618880.918101
+Noncombinational area:    359073.628372
+Net Interconnect area:      undefined  (No wire load specified)
+
+Total cell area:          977954.546473
+Total area:                 undefined
+
+Hierarchical area distribution
+------------------------------
+
+                                  Global cell area              Local cell area
+                                  --------------------  -------------------------------- 
+Hierarchical cell                 Absolute     Percent  Combi-       Noncombi-    Black
+                                  Total        Total    national     national     boxes   Design
+--------------------------------  -----------  -------  -----------  -----------  ------  ---------
+router_wrap                       979565.3750    100.0  643288.8750  335025.0938  0.0000  router_wrap
+--------------------------------  -----------  -------  -----------  -----------  ------  ---------
+Total                                                   643288.8750  335025.0938  0.0000
+
+1

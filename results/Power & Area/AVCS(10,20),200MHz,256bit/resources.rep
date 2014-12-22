@@ -1,0 +1,122 @@
+ 
+****************************************
+Report : resources
+Design : router_wrap
+Version: B-2008.09
+Date   : Wed Dec 17 10:55:36 2014
+****************************************
+
+Resource Sharing Report 
+
+===============================================================================
+|          |              |            | Contained     |                      |
+| Resource | Module       | Parameters | Resources     | Contained Operations |
+===============================================================================
+| vcr/fbs[0].allocator/r308            |               |                      |
+|          | DW01_inc     | width=3    |               | vcr/fbs[0].allocator/add_62 |
+| vcr/fbs[0].allocator/r310            |               |                      |
+|          | DW_cmp       | width=3    |               | vcr/fbs[0].allocator/gte_80 |
+| vcr/fbs[1].allocator/r308            |               |                      |
+|          | DW01_inc     | width=3    |               | vcr/fbs[1].allocator/add_62 |
+| vcr/fbs[1].allocator/r310            |               |                      |
+|          | DW_cmp       | width=3    |               | vcr/fbs[1].allocator/gte_80 |
+| vcr/fbs[2].allocator/r308            |               |                      |
+|          | DW01_inc     | width=3    |               | vcr/fbs[2].allocator/add_62 |
+| vcr/fbs[2].allocator/r310            |               |                      |
+|          | DW_cmp       | width=3    |               | vcr/fbs[2].allocator/gte_80 |
+| vcr/fbs[3].allocator/r308            |               |                      |
+|          | DW01_inc     | width=3    |               | vcr/fbs[3].allocator/add_62 |
+| vcr/fbs[3].allocator/r310            |               |                      |
+|          | DW_cmp       | width=3    |               | vcr/fbs[3].allocator/gte_80 |
+| vcr/fbs[4].allocator/r308            |               |                      |
+|          | DW01_inc     | width=3    |               | vcr/fbs[4].allocator/add_62 |
+| vcr/fbs[4].allocator/r310            |               |                      |
+|          | DW_cmp       | width=3    |               | vcr/fbs[4].allocator/gte_80 |
+| vcr/fbs[0].flb/damqc/r349            |               |                      |
+|          | DW_rightsh   | A_width=8  |               | vcr/fbs[0].flb/damqc/srl_268 |
+   |              | SH_width=3 |               | vcr/fbs[0].flb/damqc/srl_268_01 |
+| vcr/fbs[0].flb/damqc/r353            |               |                      |
+|          | DW_rightsh   | A_width=8  |               | vcr/fbs[0].flb/damqc/srl_465 |
+   |              | SH_width=3 |               | vcr/fbs[0].flb/damqc/srl_465_01 |
+| vcr/fbs[0].flb/damqc/r356            |               |                      |
+|          | DW_rightsh   | A_width=8  |               | vcr/fbs[0].flb/damqc/srl_465_02 |
+|              | SH_width=3 |               | vcr/fbs[0].flb/damqc/srl_465_03 |
+| vcr/fbs[0].flb/damqc/r363            |               |                      |
+|          | DW_cmp       | width=2    |               | vcr/fbs[0].flb/damqc/eq_271 |
+| vcr/fbs[0].flb/damqc/r365            |               |                      |
+|          | DW_cmp       | width=2    |               | vcr/fbs[0].flb/damqc/eq_455 |
+| vcr/fbs[0].flb/damqc/r367            |               |                      |
+|          | DW_cmp       | width=2    |               | vcr/fbs[0].flb/damqc/eq_462 |
+| vcr/fbs[0].flb/damqc/r369            |               |                      |
+|          | DW_cmp       | width=2    |               | vcr/fbs[0].flb/damqc/eq_455_G2 |
+| vcr/fbs[0].flb/damqc/r371            |               |                      |
+|          | DW_cmp       | width=2    |               | vcr/fbs[0].flb/damqc/eq_462_G2 |
+| vcr/fbs[0].ivc_ctrls[0].ivcc/nha/r299                |                      |
+|          | DW01_add     | width=2    |               | vcr/fbs[0].ivc_ctrls[0].ivcc/nha/add_205 |
+| vcr/fbs[0].ivc_ctrls[0].ivcc/nha/r301                |                      |
+|          | DW01_add     | width=2    |               | vcr/fbs[0].ivc_ctrls[0].ivcc/nha/add_205_G2 |
+| vcr/fbs[0].ivc_ctrls[0].ivcc/rtl/r309                |                      |
+|          | DW01_sub     | width=3    |               | vcr/fbs[0].ivc_ctrls[0].ivcc/rtl/sub_184 |
+| vcr/fbs[0].ivc_ctrls[0].ivcc/rtl/r311                |                      |
+|          | DW01_sub     | width=3    |               | vcr/fbs[0].ivc_ctrls[0].ivcc/rtl/sub_188 |
+| vcr/fbs[0].ivc_ctrls[0].ivcc/rtl/r313                |                      |
+|          | DW01_sub     | width=3    |               | vcr/fbs[0].ivc_ctrls[0].ivcc/rtl/sub_184_G2_G1 |
+| vcr/fbs[0].ivc_ctrls[0].ivcc/rtl/r315                |                      |
+|          | DW01_sub     | width=3    |               | vcr/fbs[0].ivc_ctrls[0].ivcc/rtl/sub_188_G2_G1 |
+| vcr/ips[0].ipc/fb/damqc/r478         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_271 |
+| vcr/ips[0].ipc/fb/damqc/r480         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455 |
+| vcr/ips[0].ipc/fb/damqc/r482         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462 |
+| vcr/ips[0].ipc/fb/damqc/r484         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455_G2 |
+| vcr/ips[0].ipc/fb/damqc/r486         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462_G2 |
+| vcr/ips[0].ipc/fb/damqc/r488         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455_G3 |
+| vcr/ips[0].ipc/fb/damqc/r490         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462_G3 |
+| vcr/ips[0].ipc/fb/damqc/r492         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455_G4 |
+| vcr/ips[0].ipc/fb/damqc/r494         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462_G4 |
+| vcr/ips[0].ipc/fb/damqc/r496         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455_G5 |
+| vcr/ips[0].ipc/fb/damqc/r498         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462_G5 |
+| vcr/ips[0].ipc/fb/damqc/r500         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455_G6 |
+| vcr/ips[0].ipc/fb/damqc/r502         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462_G6 |
+| vcr/ips[0].ipc/fb/damqc/r504         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455_G7 |
+| vcr/ips[0].ipc/fb/damqc/r506         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462_G7 |
+| vcr/ips[0].ipc/fb/damqc/r508         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455_G8 |
+| vcr/ips[0].ipc/fb/damqc/r510         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462_G8 |
+| vcr/ips[0].ipc/fb/damqc/r512         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455_G9 |
+| vcr/ips[0].ipc/fb/damqc/r514         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462_G9 |
+| vcr/ips[0].ipc/fb/damqc/r516         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_455_G10 |
+| vcr/ips[0].ipc/fb/damqc/r518         |               |                      |
+|          | DW_cmp       | width=5    |               | vcr/ips[0].ipc/fb/damqc/eq_462_G10 |
+| vcr/ops[0].opc/fcs/damqt/sft/free_minus1_decr/r294   |                      |
+|          | DW01_dec     | width=4    |               | vcr/ops[0].opc/fcs/damqt/sft/free_minus1_decr/sub_76 |
+| vcr/ops[0].opc/fcs/damqt/sft/free_plus1_incr/r294    |                      |
+|          | DW01_inc     | width=4    |               | vcr/ops[0].opc/fcs/damqt/sft/free_plus1_incr/add_76 |
+| vcr/ops[0].opc/fcss[0].shared_fcs/damqt/sft/free_minus1_decr/r294           |
+|          | DW01_dec     | width=2    |               | vcr/ops[0].opc/fcss[0].shared_fcs/damqt/sft/free_minus1_decr/sub_76 |
+| vcr/ops[0].opc/fcss[0].shared_fcs/damqt/sft/free_plus1_incr/r294            |
+|          | DW01_inc     | width=2    |               | vcr/ops[0].opc/fcss[0].shared_fcs/damqt/sft/free_plus1_incr/add_76 |
+===============================================================================
+
+
+No implementations to report
+
+No multiplexors to report
+1

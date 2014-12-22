@@ -1,0 +1,116 @@
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+Design : router_wrap
+Version: B-2008.09
+Date   : Wed Dec 17 08:52:00 2014
+****************************************
+
+ # A fanout number of 1000 was used for high fanout net computations.
+
+Operating Conditions: typical   Library: gscl45nm
+Wire Load Model Mode: top
+
+  Startpoint: vcr/ops[3].opc/flit_validq/q_reg[0]
+              (rising edge-triggered flip-flop clocked by clk)
+  Endpoint: vcr/ips[4].ipc/fb/samqc/queues[5].fc/pop_addrq/q_reg[0]
+            (rising edge-triggered flip-flop clocked by clk)
+  Path Group: clk
+  Path Type: max
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock clk (rise edge)                                   0.00       0.00
+  clock network delay (ideal)                             0.00       0.00
+  vcr/ops[3].opc/flit_validq/q_reg[0]/CLK (DFFSR)         0.00 #     0.00 r
+  vcr/ops[3].opc/flit_validq/q_reg[0]/Q (DFFSR)           0.11       0.11 f
+  U7831/Y (INVX1)                                         0.60       0.71 r
+  U910/Y (INVX2)                                          0.91       1.62 f
+  U7830/Y (INVX1)                                         0.58       2.21 r
+  vcr/ops[3].opc/U13/Y (AOI21X1)                          0.17       2.38 f
+  U7829/Y (BUFX2)                                         0.10       2.48 f
+  U5799/Y (AND2X1)                                        0.04       2.52 f
+  U5798/Y (INVX1)                                         0.05       2.57 r
+  vcr/ops[3].opc/fcs/U6/Y (AND2X1)                        0.04       2.61 r
+  vcr/ops[3].opc/ovcs[2].ovcc/U4/Y (AND2X1)               0.31       2.93 r
+  vcr/alo/vc_core_sep_if/mcs[0].ips[1].ircs[0].icvcs[4].elig_ovc_sel/U23/Y (AOI22X1)
+                                                          0.13       3.06 f
+  U4410/Y (INVX1)                                         0.05       3.10 r
+  U4412/Y (NOR2X1)                                        0.01       3.11 f
+  U4413/Y (INVX1)                                         0.00       3.11 r
+  U729/Y (OR2X1)                                          0.06       3.17 r
+  vcr/alo/vc_core_sep_if/mcs[0].ips[1].ircs[0].icvcs[4].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U7/Y (AND2X1)
+                                                          0.05       3.22 r
+  vcr/alo/vc_core_sep_if/mcs[0].ips[1].ircs[0].icvcs[4].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U30/Y (NOR2X1)
+                                                          0.02       3.25 f
+  vcr/alo/vc_core_sep_if/mcs[0].ips[1].ircs[0].icvcs[4].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U27/Y (NAND3X1)
+                                                          0.04       3.28 r
+  vcr/alo/vc_core_sep_if/mcs[0].ips[1].ircs[0].icvcs[4].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U26/Y (NOR3X1)
+                                                          0.09       3.37 f
+  vcr/alo/vc_core_sep_if/mcs[0].ips[1].ircs[0].icvcs[4].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U17/Y (INVX1)
+                                                          0.09       3.46 r
+  vcr/alo/vc_core_sep_if/mcs[0].ips[1].ircs[0].icvcs[4].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U20/Y (AOI22X1)
+                                                          0.03       3.49 f
+  vcr/alo/vc_core_sep_if/mcs[0].ips[1].ircs[0].icvcs[4].orcs[0].gnt_ocvc_arb/rr_arb/prios[0].gnt_ab/U11/Y (INVX1)
+                                                          0.05       3.54 r
+  vcr/alo/vc_core_sep_if/U2891/Y (AND2X1)                 0.06       3.61 r
+  vcr/alo/vc_core_sep_if/mcs[0].ops[3].orcs[0].ocvcs[5].req_out_ip_rb/ps[1].bop/U1/Y (OR2X1)
+                                                          0.06       3.66 r
+  vcr/alo/vc_core_sep_if/mcs[0].ops[3].orcs[0].ocvcs[5].req_out_ip_rb/ps[1].bop/U4/Y (NOR3X1)
+                                                          0.02       3.68 f
+  U6636/Y (AND2X1)                                        0.04       3.73 f
+  U6635/Y (INVX1)                                         0.04       3.77 r
+  vcr/alo/vc_core_sep_if/mcs[0].ops[3].orcs[0].ocvcs[5].gnt_out_ip_arb/rr_arb/prios[0].gnt_ab/U5/Y (AND2X1)
+                                                          0.06       3.83 r
+  vcr/alo/vc_core_sep_if/mcs[0].ops[3].orcs[0].ocvcs[5].gnt_out_ip_arb/rr_arb/prios[0].gnt_ab/U19/Y (NOR2X1)
+                                                          0.03       3.86 f
+  U6259/Y (AND2X2)                                        0.04       3.90 f
+  U6258/Y (INVX1)                                         0.02       3.93 r
+  vcr/alo/vc_core_sep_if/mcs[0].ops[3].orcs[0].ocvcs[5].gnt_out_ip_arb/rr_arb/prios[0].gnt_ab/U12/Y (AOI22X1)
+                                                          0.01       3.94 f
+  U8709/Y (INVX1)                                         0.18       4.12 r
+  vcr/alo/vc_core_sep_if/U415/Y (AND2X1)                  0.03       4.14 r
+  vcr/alo/vc_core_sep_if/mcs[0].ips[4].ircs[0].icvcs[2].gnt_out_orc_ocvc_or/U9/Y (NOR2X1)
+                                                          0.02       4.16 f
+  U4773/Y (AND2X2)                                        0.03       4.19 f
+  U4772/Y (INVX1)                                         0.02       4.21 r
+  vcr/alo/vc_core_sep_if/U3507/Y (OR2X1)                  0.04       4.25 r
+  vcr/alo/vc_core_sep_if/U3840/Y (NOR3X1)                 0.02       4.27 f
+  U14873/Y (AND2X2)                                       0.04       4.32 f
+  U14874/Y (INVX1)                                        0.00       4.31 r
+  U14871/Y (INVX1)                                        0.01       4.32 f
+  U14872/Y (INVX1)                                        0.01       4.33 r
+  vcr/ips[4].ipc/U8/Y (OR2X1)                             0.05       4.38 r
+  vcr/ips[4].ipc/spec_mask_sel/U4/Y (AOI22X1)             0.03       4.42 f
+  vcr/ips[4].ipc/spec_mask_sel/U1/Y (AND2X1)              0.04       4.46 f
+  vcr/ips[4].ipc/spec_mask_sel/U2/Y (NAND3X1)             0.03       4.49 r
+  vcr/ips[4].ipc/U12/Y (AND2X2)                           0.09       4.58 r
+  U8179/Y (AND2X1)                                        0.11       4.69 r
+  vcr/ips[4].ipc/fb/samqc/queues[5].fc/U29/Y (INVX1)      0.08       4.77 f
+  vcr/ips[4].ipc/fb/samqc/queues[5].fc/U41/Y (AOI22X1)
+                                                          0.04       4.81 r
+  vcr/ips[4].ipc/fb/samqc/queues[5].fc/pop_addrq/U14/Y (AOI22X1)
+                                                          0.03       4.85 f
+  vcr/ips[4].ipc/fb/samqc/queues[5].fc/pop_addrq/U13/Y (INVX1)
+                                                          0.08       4.93 r
+  vcr/ips[4].ipc/fb/samqc/queues[5].fc/pop_addrq/q_reg[0]/D (DFFSR)
+                                                          0.00       4.93 r
+  data arrival time                                                  4.93
+
+  clock clk (rise edge)                                   5.00       5.00
+  clock network delay (ideal)                             0.00       5.00
+  vcr/ips[4].ipc/fb/samqc/queues[5].fc/pop_addrq/q_reg[0]/CLK (DFFSR)
+                                                          0.00       5.00 r
+  library setup time                                     -0.07       4.93
+  data required time                                                 4.93
+  --------------------------------------------------------------------------
+  data required time                                                 4.93
+  data arrival time                                                 -4.93
+  --------------------------------------------------------------------------
+  slack (MET)                                                        0.00
+
+
+1

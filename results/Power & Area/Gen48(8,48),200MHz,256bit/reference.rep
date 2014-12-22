@@ -1,0 +1,46 @@
+ 
+****************************************
+Report : reference
+Design : router_wrap
+Version: B-2008.09
+Date   : Wed Dec 17 08:52:32 2014
+****************************************
+
+Attributes:
+    b - black box (unknown)
+   bo - allows boundary optimization
+    d - dont_touch
+   mo - map_only
+    h - hierarchical
+    n - noncombinational
+    r - removable
+    s - synthetic operator
+    u - contains unmapped logic
+
+Reference          Library       Unit Area   Count    Total Area   Attributes
+-----------------------------------------------------------------------------
+AND2X1             gscl45nm       2.346500   10851  25461.870631  
+AND2X2             gscl45nm       2.815800    1078   3035.432348  
+AOI21X1            gscl45nm       2.815800     906   2551.114756  
+AOI22X1            gscl45nm       3.285100  103757  340852.118958 
+BUFX2              gscl45nm       2.346500     211    495.111483  
+DFFPOSX1           gscl45nm       7.978100   61440  490174.453125 n
+DFFSR              gscl45nm      10.324600    5629  58117.174637  n
+HAX1               gscl45nm       4.693000      80    375.439987  r
+INVX1              gscl45nm       1.407900   81842  115225.349818 
+INVX2              gscl45nm       1.877200     200    375.440001  
+INVX4              gscl45nm       3.285100      10     32.851000  
+INVX8              gscl45nm       3.285100     240    788.423996  
+MUX2X1             gscl45nm       3.754400    1250   4693.000019  
+NAND2X1            gscl45nm       1.877200    8569  16085.726864  
+NAND3X1            gscl45nm       2.346500    8099  19004.302851  
+NOR2X1             gscl45nm       2.346500    1750   4106.374860  
+NOR3X1             gscl45nm       2.815800    6861  19319.203468  
+OAI21X1            gscl45nm       2.815800    1103   3105.827347  
+OR2X1              gscl45nm       2.346500    2049   4807.978336  
+OR2X2              gscl45nm       2.815800     261    734.923787  
+TBUFX2             gscl45nm       3.754400    6400  24028.160095  n
+XNOR2X1            gscl45nm       4.693000      80    375.439987  
+-----------------------------------------------------------------------------
+Total 22 references                                 1133745.718353
+1

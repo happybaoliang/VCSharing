@@ -1,0 +1,133 @@
+ 
+****************************************
+Report : resources
+Design : router_wrap
+Version: B-2008.09
+Date   : Wed Dec 17 08:52:32 2014
+****************************************
+
+Resource Sharing Report 
+
+===============================================================================
+|          |              |            | Contained     |                      |
+| Resource | Module       | Parameters | Resources     | Contained Operations |
+===============================================================================
+| vcr/ips[0].ipc/ivcs[0].ivcc/nha/r299 |               |                      |
+|          | DW01_add     | width=2    |               | vcr/ips[0].ipc/ivcs[0].ivcc/nha/add_205 |
+| vcr/ips[0].ipc/ivcs[0].ivcc/nha/r301 |               |                      |
+|          | DW01_add     | width=2    |               | vcr/ips[0].ipc/ivcs[0].ivcc/nha/add_205_G2 |
+| vcr/ips[0].ipc/ivcs[0].ivcc/rtl/r309 |               |                      |
+|          | DW01_sub     | width=3    |               | vcr/ips[0].ipc/ivcs[0].ivcc/rtl/sub_184 |
+| vcr/ips[0].ipc/ivcs[0].ivcc/rtl/r311 |               |                      |
+|          | DW01_sub     | width=3    |               | vcr/ips[0].ipc/ivcs[0].ivcc/rtl/sub_188 |
+| vcr/ips[0].ipc/ivcs[0].ivcc/rtl/r313 |               |                      |
+|          | DW01_sub     | width=3    |               | vcr/ips[0].ipc/ivcs[0].ivcc/rtl/sub_184_G2_G1 |
+| vcr/ips[0].ipc/ivcs[0].ivcc/rtl/r315 |               |                      |
+|          | DW01_sub     | width=3    |               | vcr/ips[0].ipc/ivcs[0].ivcc/rtl/sub_188_G2_G1 |
+| vcr/ips[0].ipc/fb/samqc/queues[0].fc/r306            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[0].fc/eq_234 |
+| vcr/ips[0].ipc/fb/samqc/queues[0].fc/r308            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[0].fc/eq_237 |
+| vcr/ips[0].ipc/fb/samqc/queues[0].fc/r310            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[0].fc/eq_259 |
+| vcr/ips[0].ipc/fb/samqc/queues[0].pop_next_addr_inc_incr/r295               |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[0].pop_next_addr_inc_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[1].fc/r306            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[1].fc/eq_234 |
+| vcr/ips[0].ipc/fb/samqc/queues[1].fc/r308            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[1].fc/eq_237 |
+| vcr/ips[0].ipc/fb/samqc/queues[1].fc/r310            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[1].fc/eq_259 |
+| vcr/ips[0].ipc/fb/samqc/queues[1].pop_next_addr_inc_incr/r296               |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[1].pop_next_addr_inc_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[2].fc/r306            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[2].fc/eq_234 |
+| vcr/ips[0].ipc/fb/samqc/queues[2].fc/r308            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[2].fc/eq_237 |
+| vcr/ips[0].ipc/fb/samqc/queues[2].fc/r310            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[2].fc/eq_259 |
+| vcr/ips[0].ipc/fb/samqc/queues[2].pop_next_addr_inc_incr/r296               |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[2].pop_next_addr_inc_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[3].fc/r306            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[3].fc/eq_234 |
+| vcr/ips[0].ipc/fb/samqc/queues[3].fc/r308            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[3].fc/eq_237 |
+| vcr/ips[0].ipc/fb/samqc/queues[3].fc/r310            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[3].fc/eq_259 |
+| vcr/ips[0].ipc/fb/samqc/queues[3].pop_next_addr_inc_incr/r295               |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[3].pop_next_addr_inc_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[4].fc/r306            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[4].fc/eq_234 |
+| vcr/ips[0].ipc/fb/samqc/queues[4].fc/r308            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[4].fc/eq_237 |
+| vcr/ips[0].ipc/fb/samqc/queues[4].fc/r310            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[4].fc/eq_259 |
+| vcr/ips[0].ipc/fb/samqc/queues[4].pop_next_addr_inc_incr/r295               |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[4].pop_next_addr_inc_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[5].fc/r306            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[5].fc/eq_234 |
+| vcr/ips[0].ipc/fb/samqc/queues[5].fc/r308            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[5].fc/eq_237 |
+| vcr/ips[0].ipc/fb/samqc/queues[5].fc/r310            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[5].fc/eq_259 |
+| vcr/ips[0].ipc/fb/samqc/queues[5].pop_next_addr_inc_incr/r296               |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[5].pop_next_addr_inc_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[6].fc/r306            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[6].fc/eq_234 |
+| vcr/ips[0].ipc/fb/samqc/queues[6].fc/r308            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[6].fc/eq_237 |
+| vcr/ips[0].ipc/fb/samqc/queues[6].fc/r310            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[6].fc/eq_259 |
+| vcr/ips[0].ipc/fb/samqc/queues[6].pop_next_addr_inc_incr/r296               |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[6].pop_next_addr_inc_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[7].fc/r306            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[7].fc/eq_234 |
+| vcr/ips[0].ipc/fb/samqc/queues[7].fc/r308            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[7].fc/eq_237 |
+| vcr/ips[0].ipc/fb/samqc/queues[7].fc/r310            |                      |
+|          | DW_cmp       | width=6    |               | vcr/ips[0].ipc/fb/samqc/queues[7].fc/eq_259 |
+| vcr/ips[0].ipc/fb/samqc/queues[7].pop_next_addr_inc_incr/r295               |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[7].pop_next_addr_inc_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[0].fc/push_addr_incr/r295                    |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[0].fc/push_addr_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[0].fc/push_addr_decr/r295                    |
+|          | DW01_dec     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[0].fc/push_addr_decr/sub_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[1].fc/push_addr_incr/r296                    |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[1].fc/push_addr_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[1].fc/push_addr_decr/r296                    |
+|          | DW01_dec     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[1].fc/push_addr_decr/sub_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[2].fc/push_addr_incr/r296                    |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[2].fc/push_addr_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[2].fc/push_addr_decr/r296                    |
+|          | DW01_dec     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[2].fc/push_addr_decr/sub_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[3].fc/push_addr_incr/r295                    |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[3].fc/push_addr_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[3].fc/push_addr_decr/r295                    |
+|          | DW01_dec     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[3].fc/push_addr_decr/sub_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[4].fc/push_addr_incr/r295                    |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[4].fc/push_addr_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[4].fc/push_addr_decr/r295                    |
+|          | DW01_dec     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[4].fc/push_addr_decr/sub_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[5].fc/push_addr_incr/r296                    |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[5].fc/push_addr_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[5].fc/push_addr_decr/r296                    |
+|          | DW01_dec     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[5].fc/push_addr_decr/sub_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[6].fc/push_addr_incr/r296                    |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[6].fc/push_addr_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[6].fc/push_addr_decr/r296                    |
+|          | DW01_dec     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[6].fc/push_addr_decr/sub_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[7].fc/push_addr_incr/r295                    |
+|          | DW01_inc     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[7].fc/push_addr_incr/add_76 |
+| vcr/ips[0].ipc/fb/samqc/queues[7].fc/push_addr_decr/r295                    |
+|          | DW01_dec     | width=3    |               | vcr/ips[0].ipc/fb/samqc/queues[7].fc/push_addr_decr/sub_76 |
+| vcr/ops[0].opc/fcs/samqt/queues[0].ft/free_minus1_decr/r294                 |
+|          | DW01_dec     | width=3    |               | vcr/ops[0].opc/fcs/samqt/queues[0].ft/free_minus1_decr/sub_76 |
+| vcr/ops[0].opc/fcs/samqt/queues[0].ft/free_plus1_incr/r294                  |
+|          | DW01_inc     | width=3    |               | vcr/ops[0].opc/fcs/samqt/queues[0].ft/free_plus1_incr/add_76 |
+===============================================================================
+
+
+No implementations to report
+
+No multiplexors to report
+1
