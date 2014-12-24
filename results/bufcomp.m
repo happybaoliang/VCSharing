@@ -24,9 +24,12 @@ b=bar(data);
 ch = get(b,'children');
 set(gca,'XTickLabel',{'6','12','18','24','30'})
 
-xlabel('number of VCs');
-ylabel('required registers');
-legend('our approach','linked-list','unified buffer structure',0);
+handle1=xlabel('number of VCs');
+handle2=ylabel('required registers');
+handle3=legend('our approach','linked-list','unified buffer structure',0);
+set(handle1,'FontSize',18);
+set(handle2,'FontSize',18);
+set(handle3,'FontSize',14);
 
 print -depsc ../figures/bufcmp1.eps
 close all
@@ -50,8 +53,11 @@ b=bar(data);
 ch = get(b,'children');
 set(gca,'XTickLabel',{'6','12','18','24','30','36','42','48','54','60','66'})
 
-ylabel('required registers');
-xlabel('number of buffer slots per port');
-legend('our approach','linked-list','unified buffer structure',0);
+handle1=ylabel('required registers');
+handle2=xlabel('number of buffer slots per port');
+handle3=legend('our approach','linked-list','unified buffer structure',0);
+set(handle1,'FontSize',18);
+set(handle2,'FontSize',18);
+set(handle3,'FontSize',14);
 
 print -depsc ../figures/bufcmp2.eps

@@ -21,4 +21,4 @@ handle=legend('L=2 flits','L=4 flits','L=8 flits','L=16 flits',0);
 xlabel('injection rate (flits/cycle)','fontsize',14)
 ylabel('average port utilization','fontsize',14)
 set(handle,'FontSize',14);
-print -depsc util.eps
+print -depsc ../figures/util.eps

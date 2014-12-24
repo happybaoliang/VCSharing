@@ -10,7 +10,7 @@ x_hotspot=[70 71 72 73 74 75 76 77 78 79 80 81 82 83];
 y_hotspot_lls=[61.1399 64.983 68.7246 71.5522 77.5221 83.9154 91.3063 97.6281 105.898 125.11 147.144 190.76 278.279 744.78];
 y_hotspot_our=[59.9799 61.6392 67.4245 70.1286 70.0229 72.4589 77.5153 94.0970 104.087 108.009 117.630 134.979 194.581 258.362];
 x_hotspot_gen24=[70 71 72 73 74 75 76 77 78 79 80 81 82];
-y_hotspot_gen24=[64.7646 68.112 69.386 74.2208 77.7584 82.9139 87.5565 97.3654 110.951 134.549 168.266 237.406 502.648];
+y_hotspot_gen24=[64.7646 68.1120 69.3860 74.2208 77.7584 82.9139 87.5565 97.3654 110.951 134.549 168.266 237.406 502.648];
 y_hotspot_gen48=[59.0521 62.1437 65.7396 69.6374 72.9387 78.3321 83.2053 87.9949 103.113 118.478 145.053 183.737 276.351 561.129];
 
 plot(x_hotspot/1250,y_hotspot_our,'-xr');
@@ -20,10 +20,12 @@ hold on;
 plot(x_hotspot_gen24/1250,y_hotspot_gen24,'-dk');
 hold on;
 plot(x_hotspot/1250,y_hotspot_gen48,'-vk');
-handle=legend('AVCS(10,20)','DBM(12,24)','Gen(8,24)','Gen(8,48)',2);
-xlabel('packet injection rate (flits/node/cycle)','fontsize',14);
-ylabel('average latency','fontsize',14);
-set(handle,'FontSize',14);
+handle1=legend('AVCS(10,20)','DBM(12,24)','Gen(8,24)','Gen(8,48)',2);
+handle2=xlabel('packet injection rate (flits/node/cycle)','fontsize',14);
+handle3=ylabel('average latency','fontsize',14);
+set(handle1,'FontSize',14);
+set(handle2,'FontSize',18);
+set(handle3,'FontSize',18);
 print -depsc ../figures/hotspotlat.eps
 close all
 
@@ -53,10 +55,12 @@ plot(x_random_gen24/1250,y_random_gen24,'-dk');
 hold on;
 plot(x_random_gen48/1250,y_random_gen48,'-vk');
 
-handle=legend('AVCS(10,20)','DBM(12,24)','Gen(8,24)','Gen(8,48)',2);
-xlabel('packet injection rate (flits/node/cycle)','fontsize',14)
-ylabel('average latency','fontsize',14)
-set(handle,'FontSize',14);
+handle1=legend('AVCS(10,20)','DBM(12,24)','Gen(8,24)','Gen(8,48)',2);
+handle2=xlabel('packet injection rate (flits/node/cycle)','fontsize',14)
+handle3=ylabel('average latency','fontsize',14)
+set(handle1,'FontSize',14);
+set(handle2,'FontSize',18);
+set(handle3,'FontSize',18);
 print -depsc ../figures/randomlat.eps
 close all
 
@@ -88,8 +92,10 @@ plot(x_transpose_gen24/1250,y_transpose_gen24,'-dk');
 hold on;
 plot(x_transpose_gen48/1250,y_transpose_gen48,'-vk');
 
-handle=legend('AVCS(10,20)','DBM(12,24)','Gen(8,24)','Gen(8,48)',2);
-xlabel('packet injection rate (flits/node/cycle)','fontsize',14)
-ylabel('average latency','fontsize',14)
-set(handle,'FontSize',14);
+handle1=legend('AVCS(10,20)','DBM(12,24)','Gen(8,24)','Gen(8,48)',2);
+handle2=xlabel('packet injection rate (flits/node/cycle)','fontsize',14)
+handle3=ylabel('average latency','fontsize',14)
+set(handle1,'FontSize',14);
+set(handle2,'FontSize',18);
+set(handle3,'FontSize',18);
 print -depsc ../figures/transposelat.eps
